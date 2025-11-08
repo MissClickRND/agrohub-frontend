@@ -1,8 +1,9 @@
 import { Box, Text, Flex, Button } from "@mantine/core";
 import { AgroHubMap } from "../../../features/Map/ui/AgroHubMap";
 import { IconPlus } from "@tabler/icons-react";
+import { Field } from "../../../features/Map/model/types";
 
-export default function FieldViewer() {
+export default function FieldViewer({ data }: { data: Field[] }) {
   return (
     <Box w="100vw">
       <Box bdrs={8} bd={"1px solid var(--white-gray)"} w="100%">
@@ -25,7 +26,7 @@ export default function FieldViewer() {
 
         <Flex gap={20}>
           <Box h="75vh" w="80%">
-            <AgroHubMap />
+            <AgroHubMap data={data} />
           </Box>
 
           <Box

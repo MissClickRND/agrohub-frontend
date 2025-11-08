@@ -1,5 +1,4 @@
-﻿import { useEffect, useState, useRef } from "react";
-
+﻿import { useEffect, useState, useRef, useMemo } from "react";
 import {
   ActionIcon,
   Modal,
@@ -9,7 +8,6 @@ import {
   Button,
 } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
-import { v4 as uuidv4 } from "uuid";
 
 // @ts-ignore
 import L from "leaflet";
@@ -17,16 +15,10 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 // @ts-ignore
 import "leaflet-draw";
+import { Field } from "../model/types";
 
-type Field = {
-  id: string;
-  name: string;
-  color: string;
-  geometry: GeoJSON.Polygon;
-};
-
-export const AgroHubMap = () => {
-  const [fields, setFields] = useState<Field[]>([]);
+export const AgroHubMap = ({ data }: { data: Field[] }) => {
+  const [userFields, setUserFields] = useState<Field[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fieldName, setFieldName] = useState("");
   const [fieldColor, setFieldColor] = useState("#3388ff");
@@ -36,6 +28,8 @@ export const AgroHubMap = () => {
   const drawnItemsRef = useRef<L.FeatureGroup | null>(null);
   const drawControlRef = useRef<any>(null);
   const labelLayersRef = useRef<L.LayerGroup>(L.layerGroup());
+
+  const allFields = useMemo(() => [...data, ...userFields], [data, userFields]);
 
   useEffect(() => {
     const map = L.map("map", { attributionControl: false }).setView(
@@ -68,7 +62,6 @@ export const AgroHubMap = () => {
           allowIntersection: false,
           shapeOptions: { color: "#3388ff", weight: 4 },
         },
-        // guidelineDistance влияет на логику, но не на визуал — визуал через CSS
         guidelineDistance: 2,
         showArea: false,
         metric: true,
@@ -88,7 +81,7 @@ export const AgroHubMap = () => {
       drawnItems.addLayer(layer);
 
       setPendingLayer(layer);
-      setFieldName(`Поле ${fields.length + 1}`);
+      setFieldName(`Поле ${allFields.length + 1}`);
       setFieldColor("#3388ff");
       setIsModalOpen(true);
     });
@@ -98,12 +91,69 @@ export const AgroHubMap = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!mapRef.current || !drawnItemsRef.current) return;
+
+    drawnItemsRef.current.clearLayers();
+    labelLayersRef.current.clearLayers();
+
+    allFields.forEach((field) => {
+      const geoJson: GeoJSON.Polygon = {
+        type: "Polygon",
+        coordinates: field.geometry,
+      };
+
+      const layer = L.geoJSON(geoJson, {
+        style: { color: field.color, weight: 2, fillOpacity: 0.2 },
+      }) as L.Polygon;
+
+      drawnItemsRef.current!.addLayer(layer);
+
+      const center = layer.getBounds().getCenter();
+      const labelIcon = L.divIcon({
+        className: "",
+        html: `<div style="
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: ${field.color};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    width: max-content;
+    min-width: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    text-align: center;
+    pointer-events: none;
+  ">${field.name}</div>`,
+        iconSize: [0, 0],
+      });
+      L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
+    });
+
+    if (allFields.length > 0) {
+      const group = L.featureGroup();
+      allFields.forEach((field) => {
+        group.addLayer(
+          L.geoJSON({
+            type: "Polygon",
+            coordinates: field.geometry,
+          })
+        );
+      });
+      mapRef.current.fitBounds(group.getBounds(), { padding: [50, 50] });
+    }
+  }, [allFields]);
+
   const handleAddField = () => {
     const layer = pendingLayer;
     const map = mapRef.current;
     if (!layer || !map) return;
 
-    const name = fieldName.trim() || `Поле ${fields.length + 1}`;
+    const name = fieldName.trim() || `Поле ${allFields.length + 1}`;
     const color = fieldColor;
 
     layer.setStyle({ color, weight: 2, fillOpacity: 0.2 });
@@ -112,17 +162,23 @@ export const AgroHubMap = () => {
     const labelIcon = L.divIcon({
       className: "",
       html: `<div style="
-        background: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: bold;
-        color: ${color};
-        white-space: nowrap;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        text-align: center;
-      ">${name}</div>`,
-      iconSize: [100, 20],
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: ${color};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    width: max-content;
+    min-width: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    text-align: center;
+    pointer-events: none;
+  ">${name}</div>`,
+      iconSize: [0, 0],
     });
     L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
 
@@ -132,16 +188,19 @@ export const AgroHubMap = () => {
       layer.toGeoJSON() as GeoJSON.Feature<GeoJSON.Polygon>;
 
     const field: Field = {
-      id: uuidv4(),
       name,
       color,
-      geometry: geoJsonFeature.geometry,
+      geometry: geoJsonFeature.geometry.coordinates,
     };
 
-    console.log("Новое поле создано (GeoJSON):", field);
-    console.log("Координаты:", field.geometry.coordinates);
+    console.log("✅ Новое поле добавлено:", {
+      // Пока что мок
+      name: field.name,
+      color: field.color,
+      coordinateCount: field.geometry,
+    });
 
-    setFields((prev) => [...prev, field]);
+    setUserFields((prev) => [...prev, field]);
     setPendingLayer(null);
     setIsModalOpen(false);
   };
@@ -157,7 +216,7 @@ export const AgroHubMap = () => {
   const handleClearAll = () => {
     drawnItemsRef.current?.clearLayers();
     labelLayersRef.current.clearLayers();
-    setFields([]);
+    setUserFields([]);
     setPendingLayer(null);
   };
 
@@ -168,7 +227,7 @@ export const AgroHubMap = () => {
           position: "relative",
           height: "100%",
           width: "100%",
-          borderRadius: "0px 8px 0px 8px ",
+          borderRadius: "0px 8px 0px 8px",
           overflow: "hidden",
         }}
       >

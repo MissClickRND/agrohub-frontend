@@ -1,7 +1,9 @@
 import { Stack, Text, Flex, Button } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
+import { Field } from "../../../features/Map/model/types";
+import FieldTemplate from "./FieldTemplate";
 
-export default function FieldManagment() {
+export default function FieldManagment({ data }: { data: Field[] }) {
   return (
     <Stack
       mih="100%"
@@ -26,6 +28,11 @@ export default function FieldManagment() {
           <IconPlus /> <Text>Добавить поле</Text>
         </Flex>
       </Button>
+      <Flex gap={8} px={16}>
+        {data.map((el) => (
+          <FieldTemplate key={el.id} data={el} />
+        ))}
+      </Flex>
     </Stack>
   );
 }

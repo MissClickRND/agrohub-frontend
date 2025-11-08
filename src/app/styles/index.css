@@ -41,3 +41,25 @@ body {
   stroke-dasharray: 4, 4 !important; /* ← штрих 4px, пробел 4px */
   stroke-linecap: round !important;
 }
+
+/* Стили для меток полей */
+.field-label-icon {
+  background: none !important;
+  border: none !important;
+  cursor: default !important;
+}
+
+.field-label-content {
+  background: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #3388ff; /* будет переопределяться через inline-style */
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
