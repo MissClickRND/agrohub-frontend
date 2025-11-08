@@ -1,10 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 :root {
-  --main-color: #4f2bcd;
-  --main-color-orange: #ff4f12;
-  --main-color-light-blue: #749fd6;
-  --main-color-lavander: #e8d2ed;
+  --main-color: #3aaa35;
   --white-gray: #efeef3;
   --navbar-button-color: #f3f5f7;
   --subtitle: #878787;
@@ -12,4 +9,9 @@
 
 * {
   font-family: "Inter", sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: black;
 }

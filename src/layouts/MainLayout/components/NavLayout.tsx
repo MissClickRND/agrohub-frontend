@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 export default function NavLayout() {
   const links = [
     { name: "Главная", link: "/" },
+    { name: "Поля", link: "/fields" },
     { name: "AI чат", link: "/chat-ai" },
     { name: "Логин", link: "/auth/login" },
   ];
