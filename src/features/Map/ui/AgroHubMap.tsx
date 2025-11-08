@@ -182,6 +182,8 @@ export const AgroHubMap = forwardRef<
       geometry: geoJsonFeature.geometry.coordinates,
     };
 
+    console.log("СОЗДАЛОСЬ - ", field.geometry);
+
     onDrawingComplete(field);
 
     setPendingLayer(null);

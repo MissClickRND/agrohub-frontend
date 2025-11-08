@@ -6,9 +6,13 @@ import FieldTemplate from "./FieldTemplate";
 export default function FieldManagement({
   onAddField,
   data,
+  onFieldSelect,
+  selectedFieldId,
 }: {
   onAddField: () => void;
   data: Field[];
+  onFieldSelect: (id: number | undefined) => void;
+  selectedFieldId: number | undefined;
 }) {
   return (
     <Stack
@@ -34,7 +38,12 @@ export default function FieldManagement({
       </Button>
       <Flex gap={8} px={16} direction="column">
         {data.map((el) => (
-          <FieldTemplate key={el.id} data={el} />
+          <FieldTemplate
+            key={el.id}
+            data={el}
+            isSelected={selectedFieldId === el.id}
+            onSelect={() => onFieldSelect(el?.id)}
+          />
         ))}
       </Flex>
     </Stack>
