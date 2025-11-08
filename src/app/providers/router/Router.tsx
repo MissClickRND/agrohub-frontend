@@ -5,7 +5,8 @@ import ChatAI from "../../../pages/ChatAI/ChatAI.page";
 import Error404 from "../../../pages/Errors/Error404/Error404.page";
 import AuthLayout from "../../../layouts/AuthLayout/AuthLayout";
 import Login from "../../../pages/Auth/Login/Login";
-import MapPage from "../../../pages/Map/Map.page";
+
+import Fields from "../../../pages/Fields/Fields.page";
 
 const router = createBrowserRouter([
   {
@@ -18,7 +19,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/fields",
-        element: <MapPage />,
+        element: <Fields />,
       },
       {
         path: "/chat-ai",

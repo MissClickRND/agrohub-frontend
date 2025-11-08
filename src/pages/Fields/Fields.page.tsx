@@ -1,7 +1,7 @@
 ﻿import { AgroHubMap } from "../../features/Map/ui/AgroHubMap.tsx";
 
-const MapPage = () => {
+const Fields = () => {
   return <AgroHubMap />;
 };
 
-export default MapPage;
+export default Fields;
