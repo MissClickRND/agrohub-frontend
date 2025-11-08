@@ -6,7 +6,7 @@ import FieldViewer from "./components/FieldViewer.tsx";
 const Fields = () => {
   return (
     <Paper bg="white" bdrs={16} p={20}>
-      <Flex gap={20} h={500}>
+      <Flex gap={20}>
         <FieldManagment />
         <FieldViewer />
       </Flex>

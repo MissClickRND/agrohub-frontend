@@ -2,7 +2,7 @@
 
 :root {
   --main-color: #3aaa35;
-  --white-gray: #efeef3;
+  --white-gray: #e5e7eb;
   --navbar-button-color: #f3f5f7;
   --subtitle: #878787;
 }
@@ -16,17 +16,28 @@ a {
   color: black;
 }
 
-.leaflet-editing-icon {
-  border-radius: 50% !important;
-  background: #3388ff !important;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4) !important;
-  width: 10px !important;
-  height: 10px !important;
-  margin-left: -5px !important;
-  margin-top: -5px !important;
+html,
+body {
+  background-color: var(--white-gray);
 }
 
-.leaflet-div-icon {
-  background: none !important;
-  border: none !important;
+/* Залитые синие точки вершин */
+.leaflet-editing-icon {
+  border-radius: 50% !important;
+  background-color: #3388ff !important;
+  border: 2px solid white !important;
+  box-shadow: 0 0 4px #0066f690 !important;
+  width: 12px !important;
+  height: 12px !important;
+  margin-left: -6px !important;
+  margin-top: -6px !important;
+  box-sizing: border-box !important;
+}
+
+/* Пунктирная линия направления — частая, скруглённая */
+.leaflet-draw-guide-dash {
+  stroke: #3388ff !important;
+  stroke-width: 2 !important;
+  stroke-dasharray: 4, 4 !important; /* ← штрих 4px, пробел 4px */
+  stroke-linecap: round !important;
 }

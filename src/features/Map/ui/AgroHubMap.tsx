@@ -22,7 +22,7 @@ type Field = {
   id: string;
   name: string;
   color: string;
-  coordinates: L.LatLng[];
+  geometry: GeoJSON.Polygon;
 };
 
 export const AgroHubMap = () => {
@@ -30,36 +30,12 @@ export const AgroHubMap = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fieldName, setFieldName] = useState("");
   const [fieldColor, setFieldColor] = useState("#3388ff");
-  const [pendingLayer, setPendingLayer] = useState<L.Polygon | null>(null); // ← храним сам слой
+  const [pendingLayer, setPendingLayer] = useState<L.Polygon | null>(null);
 
   const mapRef = useRef<L.Map | null>(null);
   const drawnItemsRef = useRef<L.FeatureGroup | null>(null);
   const drawControlRef = useRef<any>(null);
   const labelLayersRef = useRef<L.LayerGroup>(L.layerGroup());
-
-  // Круглые точки при рисовании
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = `
-      .leaflet-editing-icon {
-        border-radius: 50% !important;
-        background: #3388ff !important;
-        box-shadow: 0 0 4px rgba(0,0,0,0.4) !important;
-        width: 10px !important;
-        height: 10px !important;
-        margin-left: -5px !important;
-        margin-top: -5px !important;
-      }
-      .leaflet-div-icon {
-        background: none !important;
-        border: none !important;
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
 
   useEffect(() => {
     const map = L.map("map", { attributionControl: false }).setView(
@@ -90,8 +66,13 @@ export const AgroHubMap = () => {
         circlemarker: false,
         polygon: {
           allowIntersection: false,
-          shapeOptions: { color: "#3388ff", weight: 2 },
+          shapeOptions: { color: "#3388ff", weight: 4 },
         },
+        // guidelineDistance влияет на логику, но не на визуал — визуал через CSS
+        guidelineDistance: 2,
+        showArea: false,
+        metric: true,
+        repeatMode: false,
       },
     });
 
@@ -107,7 +88,7 @@ export const AgroHubMap = () => {
       drawnItems.addLayer(layer);
 
       setPendingLayer(layer);
-      setFieldName(`Поле ${fields.length + 1}`); // ✅ fields.length из замыкания — нормально
+      setFieldName(`Поле ${fields.length + 1}`);
       setFieldColor("#3388ff");
       setIsModalOpen(true);
     });
@@ -115,7 +96,7 @@ export const AgroHubMap = () => {
     return () => {
       map.remove();
     };
-  }, []); // ← пустой массив!
+  }, []);
 
   const handleAddField = () => {
     const layer = pendingLayer;
@@ -125,10 +106,8 @@ export const AgroHubMap = () => {
     const name = fieldName.trim() || `Поле ${fields.length + 1}`;
     const color = fieldColor;
 
-    // ✅ Применяем финальный стиль — полигон остаётся видимым
     layer.setStyle({ color, weight: 2, fillOpacity: 0.2 });
 
-    // ✅ Метка по центру
     const center = layer.getBounds().getCenter();
     const labelIcon = L.divIcon({
       className: "",
@@ -147,27 +126,30 @@ export const AgroHubMap = () => {
     });
     L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
 
-    // ✅ Фокус на полигон
     map.fitBounds(layer.getBounds(), { padding: [50, 50] });
 
-    // ✅ Готово к отправке в БД
-    const coords = layer.getLatLngs();
-    // Нормализуем: берём внешнее кольцо
-    const normalizedCoords =
-      Array.isArray(coords[0]) && !(coords[0] as any).lat
-        ? [...(coords[0] as L.LatLng[])]
-        : [...(coords as L.LatLng[])];
+    const geoJsonFeature =
+      layer.toGeoJSON() as GeoJSON.Feature<GeoJSON.Polygon>;
 
     const field: Field = {
       id: uuidv4(),
       name,
       color,
-      coordinates: normalizedCoords,
+      geometry: geoJsonFeature.geometry,
     };
 
-    console.log("Новое поле создано:", field);
+    console.log("Новое поле создано (GeoJSON):", field);
+    console.log("Координаты:", field.geometry.coordinates);
 
     setFields((prev) => [...prev, field]);
+    setPendingLayer(null);
+    setIsModalOpen(false);
+  };
+
+  const handleCancelField = () => {
+    if (pendingLayer && drawnItemsRef.current) {
+      drawnItemsRef.current.removeLayer(pendingLayer);
+    }
     setPendingLayer(null);
     setIsModalOpen(false);
   };
@@ -181,7 +163,15 @@ export const AgroHubMap = () => {
 
   return (
     <>
-      <div style={{ position: "relative", height: "500px", width: "600px" }}>
+      <div
+        style={{
+          position: "relative",
+          height: "100%",
+          width: "100%",
+          borderRadius: "0px 8px 0px 8px ",
+          overflow: "hidden",
+        }}
+      >
         <div
           style={{
             position: "absolute",
@@ -214,7 +204,7 @@ export const AgroHubMap = () => {
 
       <Modal
         opened={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCancelField}
         title="Новое поле"
         centered
         zIndex={9999}
@@ -225,7 +215,6 @@ export const AgroHubMap = () => {
           onChange={(e) => setFieldName(e.currentTarget.value)}
         />
         <ColorPicker
-          label="Цвет подсветки"
           value={fieldColor}
           onChange={setFieldColor}
           swatches={["#3388ff", "#ff5555", "#4caf50", "#ff9800", "#9c27b0"]}
@@ -233,7 +222,7 @@ export const AgroHubMap = () => {
         />
         <Group mt="md">
           <Button onClick={handleAddField}>Создать</Button>
-          <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+          <Button variant="outline" onClick={handleCancelField}>
             Отмена
           </Button>
         </Group>
