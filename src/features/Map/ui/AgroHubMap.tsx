@@ -128,7 +128,11 @@ export const AgroHubMap = forwardRef<
       const bounds = layer.getBounds();
 
       if (bounds.isValid()) {
-        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+        mapRef.current.flyToBounds(bounds, {
+          padding: [50, 50],
+          duration: 1.0,
+          easeLinearity: 0.25,
+        });
       }
     }, [selectedFieldId, data]);
 
@@ -256,7 +260,9 @@ export const AgroHubMap = forwardRef<
             position: "relative",
             height: "100%",
             width: "100%",
-            borderRadius: "0px 8px 0px 8px",
+            borderRadius: selectedFieldId
+              ? "0px 8px 0px 8px"
+              : "0px 0px 8px 8px",
             overflow: "hidden",
           }}
         >

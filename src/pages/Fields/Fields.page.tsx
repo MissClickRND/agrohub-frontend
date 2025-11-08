@@ -41,7 +41,7 @@ const initialData: Field[] = [
 const Fields = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>(
-    initialData[0]?.id
+    undefined
   );
 
   const [data, setData] = useState<Field[]>(initialData);
