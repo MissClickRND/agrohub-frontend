@@ -36,7 +36,7 @@ export default function FieldViewer({
               </Text>
             </Box>
 
-            <Button color="var(--main-color)">
+            <Button color="var(--main-color)" radius="8px">
               <IconPlus />
               <Text>Добавить зону</Text>
             </Button>

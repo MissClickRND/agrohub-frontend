@@ -31,7 +31,12 @@ export default function FieldManagement({
           Управление полями
         </Text>
       </Flex>
-      <Button color="var(--main-color)" m={16} onClick={onAddField}>
+      <Button
+        color="var(--main-color)"
+        m={16}
+        onClick={onAddField}
+        radius="8px"
+      >
         <Flex>
           <IconPlus /> <Text>Добавить поле</Text>
         </Flex>
