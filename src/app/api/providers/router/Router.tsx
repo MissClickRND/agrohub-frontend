@@ -1,12 +1,11 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import MainLayout from "../../../layouts/MainLayout/MainLayout";
-import Main from "../../../pages/Main/Main.page";
-import ChatAI from "../../../pages/ChatAI/ChatAI.page";
-import Error404 from "../../../pages/Errors/Error404/Error404.page";
-import AuthLayout from "../../../layouts/AuthLayout/AuthLayout";
-import Login from "../../../pages/Auth/Login/Login";
-
-import Fields from "../../../pages/Fields/Fields.page";
+import MainLayout from "../../../../layouts/MainLayout/MainLayout";
+import Main from "../../../../pages/Main/Main.page";
+import ChatAI from "../../../../pages/ChatAI/ChatAI.page";
+import Error404 from "../../../../pages/Errors/Error404/Error404.page";
+import AuthLayout from "../../../../layouts/AuthLayout/AuthLayout";
+import Login from "../../../../pages/Auth/Login/Login";
+import Fields from "../../../../pages/Fields/Fields.page";
 
 const router = createBrowserRouter([
   {
