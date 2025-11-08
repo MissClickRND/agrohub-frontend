@@ -5,6 +5,7 @@ export default function NavLayout() {
   const links = [
     { name: "Главная", link: "/" },
     { name: "О нас", link: "/about" },
+    { name: "Логин", link: "/auth/login" },
   ];
 
   return (

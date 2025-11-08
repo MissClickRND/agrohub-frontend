@@ -1,8 +1,7 @@
 import axios from "axios";
+import { API, endpoints } from "../../../shared/configs/apiConfigs";
+import apiClient from "../../../app/api/axiosInstance";
 import { ILoginRequest, IRegisterRequest } from "./types";
-
-import { API, endpoints } from "../../../../shared/configs/apiConfigs";
-import apiClient from "../../../../app/api/axiosInstance";
 
 export const login = async (body: ILoginRequest) => {
   const res = await axios.post(API + endpoints.LOGIN, body, {

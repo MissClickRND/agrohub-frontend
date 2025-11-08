@@ -1,32 +1,25 @@
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
-import { ILoginRequest } from "../types";
-import { login } from "../api";
+import { login } from "../../api";
 
 export const useLogin = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
   const { showError, showSuccess } = useNotifications();
 
-  const fetchLogin = async (body: ILoginRequest) => {
-    try {
-      setIsLoading(true);
-      setIsError(false);
-      setError(null);
-
-      await login(body);
+  const mutation = useMutation({
+    mutationFn: login,
+    onSuccess: () => {
       showSuccess("Вы успешно вошли");
       window.location.pathname = "/";
-    } catch (err) {
-      setIsError(true);
-      setError(err instanceof Error ? err.message : "Ошибка при авторизации");
-      showError(err instanceof Error ? err.message : "Ошибка при авторизации");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onError: (error: Error) => {
+      showError(error.message || "Ошибка при авторизации");
+    },
+  });
 
-  return { isLoading, isError, error, login: fetchLogin };
+  return {
+    login: mutation.mutate,
+    isLoading: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error?.message || null,
+  };
 };
