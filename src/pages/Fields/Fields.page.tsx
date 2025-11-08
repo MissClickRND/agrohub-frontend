@@ -1,10 +1,14 @@
-﻿import { Flex, Paper } from "@mantine/core";
-
-import FieldManagement from "./components/FieldManagement.tsx";
-import FieldViewer from "./components/FieldViewer.tsx";
+﻿import { useState } from "react";
+import { Flex, Paper } from "@mantine/core";
+import FieldManagement from "./components/FieldManagement";
+import FieldViewer from "./components/FieldViewer";
+import { Field } from "../../features/Map/model/types";
 
 const Fields = () => {
-  const data = [
+  const [userFields, setUserFields] = useState<Field[]>([]);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  const initialData: Field[] = [
     {
       id: 1,
       color: "#ff00dd",
@@ -24,11 +28,24 @@ const Fields = () => {
     },
   ];
 
+  const allFields = [...initialData, ...userFields];
+
   return (
     <Paper bg="white" bdrs={16} p={20}>
       <Flex gap={20}>
-        <FieldManagement data={data} />
-        <FieldViewer data={data} />
+        <FieldManagement
+          onAddField={() => setIsDrawing(true)}
+          data={allFields}
+        />
+        <FieldViewer
+          data={allFields}
+          isDrawing={isDrawing}
+          onDrawingComplete={(newField) => {
+            setUserFields((prev) => [...prev, newField]);
+            setIsDrawing(false);
+          }}
+          onCancelDrawing={() => setIsDrawing(false)}
+        />
       </Flex>
     </Paper>
   );

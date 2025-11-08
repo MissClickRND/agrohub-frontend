@@ -3,7 +3,13 @@ import { IconPlus } from "@tabler/icons-react";
 import { Field } from "../../../features/Map/model/types";
 import FieldTemplate from "./FieldTemplate";
 
-export default function FieldManagment({ data }: { data: Field[] }) {
+export default function FieldManagement({
+  onAddField,
+  data,
+}: {
+  onAddField: () => void;
+  data: Field[];
+}) {
   return (
     <Stack
       mih="100%"
@@ -15,20 +21,18 @@ export default function FieldManagment({ data }: { data: Field[] }) {
       <Flex
         justify="space-between"
         p={16}
-        style={{
-          borderBottom: "1px solid var(--white-gray)",
-        }}
+        style={{ borderBottom: "1px solid var(--white-gray)" }}
       >
         <Text fw={500} fz={18}>
           Управление полями
         </Text>
       </Flex>
-      <Button color="var(--main-color)" m={16}>
+      <Button color="var(--main-color)" m={16} onClick={onAddField}>
         <Flex>
           <IconPlus /> <Text>Добавить поле</Text>
         </Flex>
       </Button>
-      <Flex gap={8} px={16}>
+      <Flex gap={8} px={16} direction="column">
         {data.map((el) => (
           <FieldTemplate key={el.id} data={el} />
         ))}

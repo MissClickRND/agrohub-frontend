@@ -1,9 +1,25 @@
 import { Box, Text, Flex, Button } from "@mantine/core";
-import { AgroHubMap } from "../../../features/Map/ui/AgroHubMap";
-import { IconPlus } from "@tabler/icons-react";
+import {
+  AgroHubMap,
+  AgroHubMapHandle,
+} from "../../../features/Map/ui/AgroHubMap";
 import { Field } from "../../../features/Map/model/types";
+import { useRef } from "react";
+import { IconPlus } from "@tabler/icons-react";
 
-export default function FieldViewer({ data }: { data: Field[] }) {
+export default function FieldViewer({
+  data,
+  isDrawing,
+  onDrawingComplete,
+  onCancelDrawing,
+}: {
+  data: Field[];
+  isDrawing: boolean;
+  onDrawingComplete: (field: Field) => void;
+  onCancelDrawing: () => void;
+}) {
+  const mapRef = useRef<AgroHubMapHandle>(null);
+
   return (
     <Box w="100vw">
       <Box bdrs={8} bd={"1px solid var(--white-gray)"} w="100%">
@@ -26,7 +42,13 @@ export default function FieldViewer({ data }: { data: Field[] }) {
 
         <Flex gap={20}>
           <Box h="75vh" w="80%">
-            <AgroHubMap data={data} />
+            <AgroHubMap
+              ref={mapRef}
+              data={data}
+              isDrawing={isDrawing}
+              onDrawingComplete={onDrawingComplete}
+              onCancelDrawing={onCancelDrawing}
+            />
           </Box>
 
           <Box

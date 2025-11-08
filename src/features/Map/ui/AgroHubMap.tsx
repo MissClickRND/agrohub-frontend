@@ -1,24 +1,32 @@
-﻿import { useEffect, useState, useRef, useMemo } from "react";
-import {
-  ActionIcon,
-  Modal,
-  TextInput,
-  ColorPicker,
-  Group,
-  Button,
-} from "@mantine/core";
-import { IconPlus, IconTrash } from "@tabler/icons-react";
-
+﻿import {
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
+import { Modal, TextInput, ColorPicker, Group, Button } from "@mantine/core";
 // @ts-ignore
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-// @ts-ignore
 import "leaflet-draw";
 import { Field } from "../model/types";
 
-export const AgroHubMap = ({ data }: { data: Field[] }) => {
-  const [userFields, setUserFields] = useState<Field[]>([]);
+export type AgroHubMapHandle = {
+  startDrawing: () => void;
+};
+
+export const AgroHubMap = forwardRef<
+  AgroHubMapHandle,
+  {
+    data: Field[];
+    isDrawing: boolean;
+    onDrawingComplete: (field: Field) => void;
+    onCancelDrawing: () => void;
+  }
+>(({ data, isDrawing, onDrawingComplete, onCancelDrawing }, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fieldName, setFieldName] = useState("");
   const [fieldColor, setFieldColor] = useState("#3388ff");
@@ -29,7 +37,15 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
   const drawControlRef = useRef<any>(null);
   const labelLayersRef = useRef<L.LayerGroup>(L.layerGroup());
 
-  const allFields = useMemo(() => [...data, ...userFields], [data, userFields]);
+  const allFields = useMemo(() => data, [data]);
+
+  useImperativeHandle(ref, () => ({
+    startDrawing: () => {
+      if (drawControlRef.current) {
+        drawControlRef.current._toolbars.draw._modes.polygon.handler.enable();
+      }
+    },
+  }));
 
   useEffect(() => {
     const map = L.map("map", { attributionControl: false }).setView(
@@ -47,7 +63,6 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
     drawnItemsRef.current = drawnItems;
-
     labelLayersRef.current.addTo(map);
 
     const drawControl = new (L as any).Control.Draw({
@@ -62,10 +77,6 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
           allowIntersection: false,
           shapeOptions: { color: "#3388ff", weight: 4 },
         },
-        guidelineDistance: 2,
-        showArea: false,
-        metric: true,
-        repeatMode: false,
       },
     });
 
@@ -92,6 +103,12 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
   }, []);
 
   useEffect(() => {
+    if (isDrawing && drawControlRef.current) {
+      drawControlRef.current._toolbars.draw._modes.polygon.handler.enable();
+    }
+  }, [isDrawing]);
+
+  useEffect(() => {
     if (!mapRef.current || !drawnItemsRef.current) return;
 
     drawnItemsRef.current.clearLayers();
@@ -113,22 +130,22 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
       const labelIcon = L.divIcon({
         className: "",
         html: `<div style="
-    background: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    color: ${field.color};
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-    width: max-content;
-    min-width: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    text-align: center;
-    pointer-events: none;
-  ">${field.name}</div>`,
+          background: white;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: bold;
+          color: ${field.color};
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 120px;
+          width: max-content;
+          min-width: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+          text-align: center;
+          pointer-events: none;
+        ">${field.name}</div>`,
         iconSize: [0, 0],
       });
       L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
@@ -149,43 +166,15 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
   }, [allFields]);
 
   const handleAddField = () => {
-    const layer = pendingLayer;
-    const map = mapRef.current;
-    if (!layer || !map) return;
+    if (!pendingLayer || !mapRef.current) return;
 
     const name = fieldName.trim() || `Поле ${allFields.length + 1}`;
     const color = fieldColor;
 
-    layer.setStyle({ color, weight: 2, fillOpacity: 0.2 });
-
-    const center = layer.getBounds().getCenter();
-    const labelIcon = L.divIcon({
-      className: "",
-      html: `<div style="
-    background: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    color: ${color};
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-    width: max-content;
-    min-width: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    text-align: center;
-    pointer-events: none;
-  ">${name}</div>`,
-      iconSize: [0, 0],
-    });
-    L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
-
-    map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+    pendingLayer.setStyle({ color, weight: 2, fillOpacity: 0.2 });
 
     const geoJsonFeature =
-      layer.toGeoJSON() as GeoJSON.Feature<GeoJSON.Polygon>;
+      pendingLayer.toGeoJSON() as GeoJSON.Feature<GeoJSON.Polygon>;
 
     const field: Field = {
       name,
@@ -193,14 +182,8 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
       geometry: geoJsonFeature.geometry.coordinates,
     };
 
-    console.log("✅ Новое поле добавлено:", {
-      // Пока что мок
-      name: field.name,
-      color: field.color,
-      coordinateCount: field.geometry,
-    });
+    onDrawingComplete(field);
 
-    setUserFields((prev) => [...prev, field]);
     setPendingLayer(null);
     setIsModalOpen(false);
   };
@@ -211,13 +194,7 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
     }
     setPendingLayer(null);
     setIsModalOpen(false);
-  };
-
-  const handleClearAll = () => {
-    drawnItemsRef.current?.clearLayers();
-    labelLayersRef.current.clearLayers();
-    setUserFields([]);
-    setPendingLayer(null);
+    onCancelDrawing();
   };
 
   return (
@@ -231,33 +208,6 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
           overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: "10px",
-            right: "10px",
-            zIndex: 1000,
-            display: "flex",
-            gap: "8px",
-          }}
-        >
-          <ActionIcon
-            onClick={() => {
-              if (drawControlRef.current) {
-                (
-                  drawControlRef.current as any
-                )._toolbars.draw._modes.polygon.handler.enable();
-              }
-            }}
-            variant="filled"
-            color="green"
-          >
-            <IconPlus size={16} />
-          </ActionIcon>
-          <ActionIcon onClick={handleClearAll} variant="filled" color="red">
-            <IconTrash size={16} />
-          </ActionIcon>
-        </div>
         <div id="map" style={{ height: "100%", width: "100%" }} />
       </div>
 
@@ -288,4 +238,6 @@ export const AgroHubMap = ({ data }: { data: Field[] }) => {
       </Modal>
     </>
   );
-};
+});
+
+AgroHubMap.displayName = "AgroHubMap";
