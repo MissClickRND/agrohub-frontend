@@ -4,11 +4,12 @@ import { NavLink } from "react-router-dom";
 export default function NavLayout() {
   const links = [
     { name: "Главная", link: "/" },
-    { name: "О нас", link: "/about" },
+    { name: "AI чат", link: "/chat-ai" },
+    { name: "Логин", link: "/auth/login" },
   ];
 
   return (
-    <Flex gap={40} p={20}>
+    <Flex gap={40} p={20} bg={"orange"}>
       {links.map((el, index) => (
         <NavLink to={el.link} key={index}>
           {({ isActive }) => (

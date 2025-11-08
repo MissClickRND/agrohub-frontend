@@ -1,9 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "../../../layouts/MainLayout/MainLayout";
 import Main from "../../../pages/Main/Main.page";
-import About from "../../../pages/About/About.page";
+import ChatAI from "../../../pages/ChatAI/ChatAI.page";
 import Error404 from "../../../pages/Errors/Error404/Error404.page";
-
+import AuthLayout from "../../../layouts/AuthLayout/AuthLayout";
+import Login from "../../../pages/Auth/Login/Login";
 
 const router = createBrowserRouter([
   {
@@ -15,8 +16,22 @@ const router = createBrowserRouter([
         element: <Main />,
       },
       {
-        path: "/about",
-        element: <About />,
+        path: "/chat-ai",
+        element: <ChatAI />,
+      },
+    ],
+  },
+  {
+    path: "/auth",
+    element: <AuthLayout />,
+    children: [
+      {
+        path: "/auth/login",
+        element: <Login />,
+      },
+      {
+        path: "/auth/register",
+        element: <></>,
       },
     ],
   },
