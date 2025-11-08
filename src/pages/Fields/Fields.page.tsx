@@ -39,32 +39,30 @@ const initialData: Field[] = [
   },
 ];
 const Fields = () => {
-  const [userFields, setUserFields] = useState<Field[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
-
   const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>(
-    initialData[0].id
+    initialData[0]?.id
   );
 
-  const allFields = [...initialData, ...userFields];
+  const [data, setData] = useState<Field[]>(initialData);
 
   return (
     <Paper bg="white" bdrs={16} p={20}>
       <Flex gap={20}>
         <FieldManagement
           onAddField={() => setIsDrawing(true)}
-          data={allFields}
+          data={data}
           onFieldSelect={setSelectedFieldId}
           selectedFieldId={selectedFieldId}
         />
         <FieldViewer
-          data={allFields}
+          data={data}
           isDrawing={isDrawing}
-          onDrawingComplete={(newField) => {
-            setUserFields((prev) => [...prev, newField]);
+          onDrawingComplete={async (newField) => {
             setIsDrawing(false);
-          }}
+          }} // потом перерендер
           onCancelDrawing={() => setIsDrawing(false)}
+          selectedFieldId={selectedFieldId}
         />
       </Flex>
     </Paper>

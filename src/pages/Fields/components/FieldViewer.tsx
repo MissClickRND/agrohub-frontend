@@ -1,22 +1,23 @@
-import { Box, Text, Flex, Button } from "@mantine/core";
+import { Box, Text, Flex } from "@mantine/core";
+import { useRef } from "react";
 import {
   AgroHubMap,
   AgroHubMapHandle,
 } from "../../../features/Map/ui/AgroHubMap";
 import { Field } from "../../../features/Map/model/types";
-import { useRef } from "react";
-import { IconPlus } from "@tabler/icons-react";
 
 export default function FieldViewer({
   data,
   isDrawing,
   onDrawingComplete,
   onCancelDrawing,
+  selectedFieldId,
 }: {
   data: Field[];
   isDrawing: boolean;
   onDrawingComplete: (field: Field) => void;
   onCancelDrawing: () => void;
+  selectedFieldId: number | undefined;
 }) {
   const mapRef = useRef<AgroHubMapHandle>(null);
 
@@ -32,12 +33,6 @@ export default function FieldViewer({
               Центральная поле ростовской области
             </Text>
           </Box>
-
-          <Button color="var(--main-color)">
-            <Flex>
-              <IconPlus /> <Text>Добавить зону</Text>
-            </Flex>
-          </Button>
         </Flex>
 
         <Flex gap={20}>
@@ -48,9 +43,9 @@ export default function FieldViewer({
               isDrawing={isDrawing}
               onDrawingComplete={onDrawingComplete}
               onCancelDrawing={onCancelDrawing}
+              selectedFieldId={selectedFieldId}
             />
           </Box>
-
           <Box
             style={{
               borderRadius: "8px 0px 8px 0px",
