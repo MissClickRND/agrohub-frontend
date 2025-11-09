@@ -10,7 +10,7 @@ export const ChatsList = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   return (
     <Paper component={motion.div} variants={chatListVar} initial="hide" animate={isOpen? "show" : "hide"} withBorder style={{position: "absolute", left: 0, top: 0}} h={"100%"} w={"20rem"}>
-      <Stack align='center' pt={"6rem"} gap={0}>
+      <Stack align='center' pt={"2rem"} gap={0}>
         <Text style={{alignSelf: "start"}} ml={"1rem"} c={'neutral.4'}>Чаты:</Text>
         {chatsMock.map((chat) => (
           <Paper whileHover={{backgroundColor: theme.colors.neutral[1]}} component={motion.div} p={'.5rem 1rem'} w={"90%"} bg={"transparent"}>
@@ -21,7 +21,7 @@ export const ChatsList = () => {
         )) }
       </Stack>
 
-        <ActionIcon style={{position: "absolute", top: "5rem", left: "20.5rem"}} onClick={() => setIsOpen(!isOpen)} color='primary.4'>
+        <ActionIcon style={{position: "absolute", top: "2rem", left: "20.5rem"}} onClick={() => setIsOpen(!isOpen)} color='primary.4'>
           {isOpen ? <IconArrowLeft/> : <IconArrowRight/>}
         </ActionIcon>
 

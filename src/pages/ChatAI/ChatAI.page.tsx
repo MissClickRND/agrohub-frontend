@@ -5,14 +5,14 @@ import { ChatsList } from "../../features/chat/ui/ChatsList/ui/ChatsList";
 
 export default function ChatAI() {
   return (
-    <Flex w={"100vw - 40px"} bg={"white"} justify={"center"}>
+    <Flex w={"100% - 40px"} style={{position: "relative"}} bg={"white"} justify={"center"}>
       <Flex
         style={{
           position: "relative",
         }}
         justify={"end"}
         direction="column"
-        h={"calc(100vh - 120px)"}
+        h={"calc(100vh - 60px)"}
         w="calc(100% - 10rem)"
         maw="50rem"
         bg="white"
