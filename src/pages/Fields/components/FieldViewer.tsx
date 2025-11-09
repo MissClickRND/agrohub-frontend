@@ -36,7 +36,7 @@ export default function FieldViewer({
               </Text>
             </Box>
 
-            <Button color="primary.4" radius="8px" align={"center"}>
+            <Button color="primary.4" radius="8px">
               <Box mr={8}>
                 <IconPlus />
               </Box>
