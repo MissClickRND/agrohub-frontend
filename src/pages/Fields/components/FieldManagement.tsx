@@ -18,9 +18,7 @@ export default function FieldManagement({
     <Stack
       mih="100%"
       gap={0}
-      w={300}
-      bdrs={8}
-      bd={"1px solid var(--white-gray)"}
+      w={400}
     >
       <Flex
         justify="space-between"

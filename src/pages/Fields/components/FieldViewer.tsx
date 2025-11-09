@@ -23,8 +23,8 @@ export default function FieldViewer({
   const mapRef = useRef<AgroHubMapHandle>(null);
 
   return (
-    <Box w="100vw">
-      <Box bdrs={8} bd={"1px solid var(--white-gray)"} w="100%">
+    <Box h={"100%"}>
+      <Box h={"100%"} bdrs={8} w="100%">
         {selectedFieldId && (
           <Flex align="center" justify="space-between" p={16}>
             <Box>
@@ -44,7 +44,7 @@ export default function FieldViewer({
         )}
 
         {!selectedFieldId && (
-          <Flex align="center" justify="space-between" p={16}>
+          <Flex mah={78.5} align="center" justify="space-between" p={16}>
             <Box>
               <Text fw={500} fz={18}>
                 Выберите поле
@@ -56,8 +56,8 @@ export default function FieldViewer({
           </Flex>
         )}
 
-        <Flex gap={20}>
-          <Box h="75vh" w={selectedFieldId ? "80%" : "100%"}>
+        <Flex flex={1} h={"calc(100% - 78.5px)"} gap={20}>
+          <Box p={20} h={"100%"} w={selectedFieldId ? "80%" : "100%"}>
             <AgroHubMap
               ref={mapRef}
               data={data}
