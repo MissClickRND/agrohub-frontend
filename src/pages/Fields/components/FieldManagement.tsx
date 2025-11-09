@@ -1,4 +1,4 @@
-import { Stack, Text, Flex, Button } from "@mantine/core";
+import { Stack, Text, Flex, Button, Box } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { Field } from "../../../features/Map/model/types";
 import FieldTemplate from "./FieldTemplate";
@@ -15,13 +15,7 @@ export default function FieldManagement({
   selectedFieldId: number | undefined;
 }) {
   return (
-    <Stack
-      mih="100%"
-      gap={0}
-      w={300}
-      bdrs={8}
-      bd={"1px solid var(--white-gray)"}
-    >
+    <Stack mih="100%" gap={0} w={400}>
       <Flex
         justify="space-between"
         p={16}
@@ -31,25 +25,19 @@ export default function FieldManagement({
           Управление полями
         </Text>
       </Flex>
-      <Button
-        color="var(--main-color)"
-        m={16}
-        onClick={onAddField}
-        radius="8px"
-      >
-        <Flex>
-          <IconPlus /> <Text>Добавить поле</Text>
-        </Flex>
+      <Button color="primary.4" m={16} onClick={onAddField}>
+        <Box mr={8}>
+          <IconPlus />
+        </Box>
+        Добавить поле
       </Button>
       <Flex gap={8} px={16} direction="column">
         {data?.map((el) => (
           <FieldTemplate
-            key={el.id}
+            key={el?.id}
             data={el}
             isSelected={selectedFieldId === el.id}
-            onSelect={() => {
-              onFieldSelect(el?.id);
-            }}
+            onSelect={() => onFieldSelect(el?.id)}
           />
         ))}
       </Flex>

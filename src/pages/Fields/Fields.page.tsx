@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-import { Flex, Paper } from "@mantine/core";
+import { Grid } from "@mantine/core";
 import FieldManagement from "./components/FieldManagement";
 import FieldViewer from "./components/FieldViewer";
 import { Field } from "../../features/Map/model/types";
@@ -19,14 +19,19 @@ const Fields = () => {
   }, [getFields]);
 
   return (
-    <Paper bg="white" bdrs={16} p={20}>
-      <Flex gap={20}>
+    <Grid gutter={0} h={"100%"} styles={{ inner: { height: "100%" } }}>
+      <Grid.Col
+        style={{ borderRight: "1px solid var(--white-gray)" }}
+        span={"content"}
+      >
         <FieldManagement
           onAddField={() => setIsDrawing(true)}
           data={data}
           onFieldSelect={setSelectedFieldId}
           selectedFieldId={selectedFieldId}
         />
+      </Grid.Col>
+      <Grid.Col span={"auto"}>
         <FieldViewer
           data={data}
           isDrawing={isDrawing}
@@ -36,8 +41,8 @@ const Fields = () => {
           onCancelDrawing={() => setIsDrawing(false)}
           selectedFieldId={selectedFieldId}
         />
-      </Flex>
-    </Paper>
+      </Grid.Col>
+    </Grid>
   );
 };
 

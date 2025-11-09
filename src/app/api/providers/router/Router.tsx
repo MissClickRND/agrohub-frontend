@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import MainLayout from "../../../../layouts/MainLayout/MainLayout";
 import Main from "../../../../pages/Main/Main.page";
 import ChatAI from "../../../../pages/ChatAI/ChatAI.page";
@@ -13,7 +14,7 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       {
-        path: "/",
+        path: "/main",
         element: <Main />,
       },
       {
