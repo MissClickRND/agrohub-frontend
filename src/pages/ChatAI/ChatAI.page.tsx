@@ -1,11 +1,27 @@
-import { Box, Text } from "@mantine/core";
+import { Flex } from "@mantine/core";
+import { ChatInput } from "../../features/chat/ui/ChatInput";
+import { MessagesList } from "../../features/chat/ui/MessagesList";
+import { ChatsList } from "../../features/chat/ui/ChatsList/ui/ChatsList";
 
 export default function ChatAI() {
   return (
-    <Box w="100vw" bg="blue">
-      <Text py={50} ta="center" fz={28} c="white">
-        Вторая страница сайта
-      </Text>
-    </Box>
+    <Flex w={"100vw - 40px"} bg={"white"} justify={"center"}>
+      <Flex
+        style={{
+          position: "relative",
+        }}
+        justify={"end"}
+        direction="column"
+        h={"calc(100vh - 120px)"}
+        w="calc(100% - 10rem)"
+        maw="50rem"
+        bg="white"
+        pb={"7rem"}
+      >
+        <ChatInput />
+        <MessagesList />
+      </Flex>
+      <ChatsList />
+    </Flex>
   );
 }
