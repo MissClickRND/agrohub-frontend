@@ -10,7 +10,7 @@ export default function NavLayout() {
   ];
 
   return (
-    <Flex gap={40} p={20} bg={"orange"}>
+    <Flex style={{zIndex: 100, position: 'relative'}} gap={40} p={20} bg={"orange"}>
       {links.map((el, index) => (
         <NavLink to={el.link} key={index}>
           {({ isActive }) => (
