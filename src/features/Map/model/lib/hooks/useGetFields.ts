@@ -1,23 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
 import { getFields } from "../../api";
-import { useEffect } from "react";
 
 export const useGetFields = () => {
   const { showError } = useNotifications();
+
   const query = useQuery({
     queryKey: ["fields"],
     queryFn: getFields,
   });
 
-  useEffect(() => {
-    if (query.isError && query.error) {
-      showError(query.error.message || "Ошибка получения полей");
-    }
-  }, [query.isError, query.error, showError]);
+  if (query.isError && query.error) {
+    // без useEffect — чтобы не ловить гонки, Mantine нотификация безопасна
+    showError(query.error.message || "Ошибка получения полей");
+  }
 
   return {
-    getFields: query.data,
+    fields: query.data ?? [],
     isLoading: query.isPending,
     isError: query.isError,
     error: query.error?.message || null,

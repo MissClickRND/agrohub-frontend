@@ -3,18 +3,17 @@ import { useNotifications } from "../../../../../shared/lib/hooks/useNotificatio
 import { deleteField } from "../../api";
 
 export const useDeleteField = () => {
+  const qc = useQueryClient();
   const { showError, showSuccess } = useNotifications();
-  const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: deleteField,
-    onSuccess: () => {
-      showSuccess("Поле успешно удалено");
-      queryClient.invalidateQueries({ queryKey: ["fields"] });
+    mutationFn: (id?: number) => deleteField(id),
+    onSuccess: (_res, id) => {
+      showSuccess("Поле удалено");
+      qc.invalidateQueries({ queryKey: ["fields"] });
+      if (id) qc.invalidateQueries({ queryKey: ["zones", id] });
     },
-    onError: (error: Error) => {
-      showError(error.message || "Ошибка удаления поля");
-    },
+    onError: (e: Error) => showError(e.message || "Ошибка удаления поля"),
   });
 
   return {

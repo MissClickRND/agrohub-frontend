@@ -1,16 +1,19 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
 import { newZone } from "../../api";
+import { Zone } from "../../types";
 
-export const useSetNewZone = () => {
+export const useSetNewZone = (fieldId?: number) => {
   const { showError, showSuccess } = useNotifications();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: newZone,
+    mutationFn: (body: Zone) => newZone({ body, id: fieldId }),
     onSuccess: () => {
-      showSuccess("Зона успешна создана");
-      queryClient.invalidateQueries({ queryKey: ["zones"] });
+      showSuccess("Зона успешно создана");
+      if (fieldId) {
+        queryClient.invalidateQueries({ queryKey: ["zones", fieldId] });
+      }
     },
     onError: (error: Error) => {
       showError(error.message || "Ошибка создания зоны");

@@ -47,7 +47,11 @@ export default function FieldTemplate({
             c="red"
             h={20}
             w={20}
-            onClick={open}
+            onClick={(e) => {
+              e.stopPropagation(); // чтобы не срабатывал select поля при клике на корзину
+              open();
+            }}
+            title="Удалить поле"
           >
             <IconTrash height={16} width={16} />
           </ActionIcon>
@@ -56,10 +60,10 @@ export default function FieldTemplate({
           Площадь: {((data.area ?? 0) / 10000).toFixed(1)} га
         </Text>
         <Text fz={12} c="var(--subtitle)">
-          Почва: {data.soil}
+          Почва: {data.soil ?? "—"}
         </Text>
         <Text fz={12} c="var(--subtitle)">
-          Зон: {data?.zones?.length}
+          Зон: {data?.zones?.length ?? 0}
         </Text>
       </UnstyledButton>
     </>

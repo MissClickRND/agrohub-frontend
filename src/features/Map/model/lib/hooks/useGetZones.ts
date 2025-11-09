@@ -1,25 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
 import { getZones } from "../../api";
-import { useEffect } from "react";
 
-export const useGetZones = (id: number) => {
+export const useGetZones = (id?: number) => {
   const { showError } = useNotifications();
 
   const query = useQuery({
     queryKey: ["zones", id],
-    queryFn: () => getZones(id),
+    queryFn: () => getZones(id as number),
     enabled: !!id,
   });
 
-  useEffect(() => {
-    if (query.isError && query.error) {
-      showError(query.error.message || "Ошибка получения зон поля");
-    }
-  }, [query.isError, query.error, showError]);
+  if (query.isError && query.error) {
+    showError(query.error.message || "Ошибка получения зон поля");
+  }
 
   return {
-    zones: query.data,
+    zones: query.data ?? [],
     isLoading: query.isPending,
     isError: query.isError,
     error: query.error?.message || null,

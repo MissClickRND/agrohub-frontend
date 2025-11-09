@@ -1,67 +1,42 @@
-import {
-  Stack,
-  Text,
-  Flex,
-  Button,
-  Box,
-  LoadingOverlay,
-  Loader,
-} from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
-import { Field } from "../../../features/Map/model/types";
+import { Box, Button, Stack, Text } from "@mantine/core";
 import FieldTemplate from "./FieldTemplate";
-import { useGetFields } from "../../../features/Map/model/lib/hooks/useGetFields";
+import { Field } from "../../../features/Map/model/types";
 
 export default function FieldManagement({
-  onAddField,
   data,
-  onFieldSelect,
+  isLoading,
   selectedFieldId,
+  onFieldSelect,
+  onAddField,
 }: {
-  onAddField: () => void;
   data: Field[];
-  onFieldSelect: (id: number | undefined) => void;
-  selectedFieldId: number | undefined;
+  isLoading: boolean;
+  selectedFieldId?: number;
+  onFieldSelect: (id?: number) => void;
+  onAddField: () => void;
 }) {
-  const { isLoading } = useGetFields();
   return (
-    <Stack h="94vh" gap={0} w={400}>
-      <Flex
-        justify="space-between"
-        p={16}
-        style={{ borderBottom: "1px solid var(--white-gray)" }}
-      >
-        <Text fw={500} fz={18}>
-          Управление полями
-        </Text>
-      </Flex>
-      <Button color="primary.4" m={16} onClick={onAddField}>
-        <Box mr={8}>
-          <IconPlus />
-        </Box>
+    <Box p={12} w={280}>
+      <Button fullWidth mb={12} onClick={onAddField}>
         Добавить поле
       </Button>
-      <Flex
-        gap={8}
-        px={16}
-        pb={8}
-        direction="column"
-        pos="relative"
-        style={{ overflowY: "scroll" }}
-        h="100%"
-      >
-        <LoadingOverlay visible={isLoading}>
-          <Loader />
-        </LoadingOverlay>
-        {data?.map((el) => (
+
+      <Text fw={600} mb={8}>
+        Поля
+      </Text>
+      <Stack gap={8}>
+        {isLoading && <Text c="dimmed">Загрузка…</Text>}
+        {!isLoading && data.length === 0 && <Text c="dimmed">Нет полей</Text>}
+
+        {data.map((f) => (
           <FieldTemplate
-            key={el?.id}
-            data={el}
-            isSelected={selectedFieldId === el.id}
-            onSelect={() => onFieldSelect(el?.id)}
+            key={f.id ?? f.name}
+            data={f}
+            isSelected={selectedFieldId === f.id}
+            onSelect={() => onFieldSelect(f.id)}
           />
         ))}
-      </Flex>
-    </Stack>
+      </Stack>
+    </Box>
   );
 }

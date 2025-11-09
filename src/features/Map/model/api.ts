@@ -15,7 +15,7 @@ export const newField = async (body: Field) => {
     throw new Error("Ошибка создания поля");
 };
 
-export const getFields = async () => {
+export const getFields = async (): Promise<Field[]> => {
   const res = await apiClient.get(API + endpoints.GET_FIELDS);
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка получения полей");
@@ -35,7 +35,7 @@ export const newZone = async ({
   body: Zone;
   id: number | undefined;
 }) => {
-  const res = await apiClient.put(API + endpoints.NEW_ZONE + `${id}/create`, {
+  const res = await apiClient.put(API + endpoints.NEW_ZONE + `/${id}/create`, {
     name: body.name,
     color: body.color,
     geometry: {
@@ -47,9 +47,9 @@ export const newZone = async ({
     throw new Error("Ошибка создания зоны");
 };
 
-export const getZones = async (id: number) => {
+export const getZones = async (id: number): Promise<Zone[]> => {
   const res = await apiClient.get(
-    API + endpoints.GET_ZONES + `${id}/zones/list`
+    API + endpoints.GET_ZONES + `/${id}/zones/list`
   );
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка получения зон поля");

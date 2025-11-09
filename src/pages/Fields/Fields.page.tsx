@@ -1,22 +1,13 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useRef, useState } from "react";
 import { Grid } from "@mantine/core";
 import FieldManagement from "./components/FieldManagement";
-import FieldViewer from "./components/FieldViewer";
-import { Field } from "../../features/Map/model/types";
+import FieldViewer, { FieldViewerHandle } from "./components/FieldViewer";
 import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields";
 
 const Fields = () => {
-  const { getFields } = useGetFields();
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>(
-    undefined
-  );
-
-  const [data, setData] = useState<Field[]>([]);
-
-  useEffect(() => {
-    setData(getFields);
-  }, [getFields]);
+  const { fields, isLoading } = useGetFields();
+  const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>();
+  const viewerRef = useRef<FieldViewerHandle>(null);
 
   return (
     <Grid gutter={0} h={"100%"} styles={{ inner: { height: "100%" } }}>
@@ -25,20 +16,18 @@ const Fields = () => {
         span={"content"}
       >
         <FieldManagement
-          onAddField={() => setIsDrawing(true)}
-          data={data}
-          onFieldSelect={setSelectedFieldId}
+          isLoading={isLoading}
+          data={fields}
           selectedFieldId={selectedFieldId}
+          onFieldSelect={setSelectedFieldId}
+          onAddField={() => viewerRef.current?.startFieldDrawing()}
         />
       </Grid.Col>
+
       <Grid.Col span={"auto"}>
         <FieldViewer
-          data={data}
-          isDrawing={isDrawing}
-          onDrawingComplete={async (newField) => {
-            setIsDrawing(false);
-          }}
-          onCancelDrawing={() => setIsDrawing(false)}
+          ref={viewerRef}
+          fields={fields}
           selectedFieldId={selectedFieldId}
         />
       </Grid.Col>
