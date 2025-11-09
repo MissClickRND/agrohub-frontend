@@ -7,7 +7,15 @@ export const useLogin = () => {
 
   const mutation = useMutation({
     mutationFn: login,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Сохраняем токены в localStorage
+      if (data.access_token) {
+        localStorage.setItem("access_token", data.access_token);
+      }
+      if (data.refresh_token) {
+        localStorage.setItem("refresh_token", data.refresh_token);
+      }
+
       showSuccess("Вы успешно вошли");
       window.location.pathname = "/";
     },
