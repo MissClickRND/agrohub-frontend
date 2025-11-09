@@ -1,7 +1,7 @@
 ﻿//TODO: links to config routes file
 import {
     IconCalculator, IconCalculatorOff,
-    IconCarrot, IconChartBar,
+    IconCarrot, IconChartBar, IconCircuitGround,
     IconDashboard,
     IconHome,
     IconMessageChatbot,
@@ -30,6 +30,11 @@ const navbarLinks = [
         label: 'Калькулятор',
         link: '/calc',
         icon: <IconCalculatorOff/>,
+    },
+    {
+        label: 'Состав почв',
+        link: '/ground',
+        icon: <IconCircuitGround/>,
     },
     {
         label: 'Чат',

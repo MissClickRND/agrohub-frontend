@@ -1,9 +1,10 @@
 import {Outlet} from "react-router-dom";
-import NavLayout from "./components/NavLayout";
-import {AppShell, Box} from "@mantine/core";
+import {AppShell} from "@mantine/core";
 import {useEffect} from "react";
 import {useUserInfo} from "../../features/auth/model/lib/hooks/useUserInfo";
 import {NavbarNested} from "../../widgets/NavBarNested/NavBarNested.tsx";
+import AnimationLayout from "../AnimatedLayout/AnimatedLayout.tsx";
+import Header from "../../widgets/Header/Header.tsx";
 
 export default function MainLayout() {
     const {userInfo} = useUserInfo();
@@ -24,12 +25,19 @@ export default function MainLayout() {
                 }}
             >
                 <AppShell.Header>
-                    <div>Logo</div>
+                   <Header />
                 </AppShell.Header>
 
-                <AppShell.Navbar><NavbarNested show={true}/></AppShell.Navbar>
+                <AppShell.Navbar>
+                    <NavbarNested show={true}/>
+                </AppShell.Navbar>
 
-                <AppShell.Main h={"100%"}><Outlet/></AppShell.Main>
+                <AppShell.Main h={"100%"}>
+                    {/*@ts-ignore*/}
+                    <AnimationLayout>
+                        <Outlet/>
+                    </AnimationLayout>
+                </AppShell.Main>
             </AppShell>
         </>
     );

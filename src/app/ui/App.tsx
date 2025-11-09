@@ -1,6 +1,8 @@
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/charts/styles.css";
+import '@mantine/spotlight/styles.css';
+
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import { MantineProvider } from "@mantine/core";
