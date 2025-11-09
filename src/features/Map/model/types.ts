@@ -5,5 +5,5 @@ export type Field = {
   geometry: number[][][];
   zone?: number; //количество зон или массив инфы о зонах
   soil?: string; // название грунта
-  square?: number; // площадь
+  area?: number; // площадь
 };

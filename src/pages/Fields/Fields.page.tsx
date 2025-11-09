@@ -19,7 +19,7 @@ const initialData: Field[] = [
     ],
     zone: 1,
     soil: "Чернозем",
-    square: 18,
+    area: 18,
   },
   {
     id: 2,
@@ -35,7 +35,7 @@ const initialData: Field[] = [
     ],
     zone: 1,
     soil: "Чернозем",
-    square: 24,
+    area: 24,
   },
 ];
 const Fields = () => {

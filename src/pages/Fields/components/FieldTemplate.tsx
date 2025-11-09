@@ -28,7 +28,7 @@ export default function FieldTemplate({
       </Flex>
 
       <Text fz={12} c="var(--subtitle)" mt={4}>
-        Площадь: {data.square} га
+        Площадь: {data.area} га
       </Text>
       <Text fz={12} c="var(--subtitle)">
         Почва: {data.soil}

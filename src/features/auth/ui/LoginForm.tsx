@@ -7,11 +7,12 @@ const LoginForm = () => {
   const { isLoading, login } = useLogin();
   const form = useForm({
     initialValues: {
-      email: "",
+      username: "",
       password: "",
     },
     validate: {
-      email: (value) => (value.length >= 3 ? null : "Логин слишком короткий"),
+      username: (value) =>
+        value.length >= 3 ? null : "Логин слишком короткий",
       password: (value) =>
         value.length >= 5 ? null : "Пароль слишком короткий",
     },
@@ -23,12 +24,12 @@ const LoginForm = () => {
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack>
-        <Input.Wrapper label="Email" error={form.errors.email}>
+        <Input.Wrapper label="Имя" error={form.errors.username}>
           <Input
             w={400}
             size="md"
-            placeholder="Введите вашу почту"
-            {...form.getInputProps("email")}
+            placeholder="Введите ваше имя"
+            {...form.getInputProps("username")}
           />
         </Input.Wrapper>
         <Input.Wrapper label="Пароль">

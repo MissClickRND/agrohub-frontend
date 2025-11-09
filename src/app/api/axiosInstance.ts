@@ -31,7 +31,7 @@ apiClient.interceptors.response.use(
 
       try {
         // Запрос на обновление токена
-        await apiClient.get("/refresh");
+        await apiClient.get("/api/auth/login");
 
         // Повторяем оригинальный запрос
         return apiClient(originalRequest);
