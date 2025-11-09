@@ -1,7 +1,11 @@
-import { Button, Flex } from "@mantine/core";
+import { Button, Flex, Text } from "@mantine/core";
 import { NavLink } from "react-router-dom";
+import { useMeStore } from "../../../entities/me/model/meStore";
+import { useLogout } from "../../../features/auth/model/lib/hooks/useLogout";
 
 export default function NavLayout() {
+  const { logout } = useLogout();
+  const { userName } = useMeStore();
   const links = [
     { name: "Главная", link: "/" },
     { name: "Поля", link: "/fields" },
@@ -10,7 +14,12 @@ export default function NavLayout() {
   ];
 
   return (
-    <Flex style={{zIndex: 100, position: 'relative'}} gap={40} p={20} bg={"orange"}>
+    <Flex
+      style={{ zIndex: 100, position: "relative" }}
+      gap={40}
+      p={20}
+      bg={"orange"}
+    >
       {links.map((el, index) => (
         <NavLink to={el.link} key={index}>
           {({ isActive }) => (
@@ -18,6 +27,9 @@ export default function NavLayout() {
           )}
         </NavLink>
       ))}
+
+      <Text> USERNAME: {userName}</Text>
+      <Button onClick={logout}>Выйти из аккаунта</Button>
     </Flex>
   );
 }
