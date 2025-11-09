@@ -1,50 +1,22 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Flex, Paper } from "@mantine/core";
 import FieldManagement from "./components/FieldManagement";
 import FieldViewer from "./components/FieldViewer";
 import { Field } from "../../features/Map/model/types";
-const initialData: Field[] = [
-  {
-    id: 1,
-    color: "#ff00dd",
-    name: "TEST",
-    geometry: [
-      [
-        [38.788322, 56.229001],
-        [39.128946, 55.873154],
-        [40.249708, 56.079087],
-        [39.447594, 56.626927],
-        [38.788322, 56.229001],
-      ],
-    ],
-    zone: 1,
-    soil: "Чернозем",
-    area: 18,
-  },
-  {
-    id: 2,
-    color: "#ff00dd",
-    name: "TEST2",
-    geometry: [
-      [
-        [30.509621, 59.818866],
-        [30.817281, 59.33487],
-        [32.355582, 59.552695],
-        [30.509621, 59.818866],
-      ],
-    ],
-    zone: 1,
-    soil: "Чернозем",
-    area: 24,
-  },
-];
+import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields";
+
 const Fields = () => {
+  const { getFields } = useGetFields();
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>(
     undefined
   );
 
-  const [data, setData] = useState<Field[]>(initialData);
+  const [data, setData] = useState<Field[]>([]);
+
+  useEffect(() => {
+    setData(getFields);
+  }, [getFields]);
 
   return (
     <Paper bg="white" bdrs={16} p={20}>

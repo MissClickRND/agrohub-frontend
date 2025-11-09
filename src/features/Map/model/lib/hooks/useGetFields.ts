@@ -17,7 +17,7 @@ export const useGetFields = () => {
   }, [query.isError, query.error, showError]);
 
   return {
-    fields: query.data,
+    getFields: query.data,
     isLoading: query.isPending,
     isError: query.isError,
     error: query.error?.message || null,

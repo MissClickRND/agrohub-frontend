@@ -13,6 +13,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
 import { Field } from "../model/types";
+import { useSetNewField } from "../model/lib/hooks/useSetNewField";
 
 export type AgroHubMapHandle = {
   startDrawing: () => void;
@@ -32,6 +33,7 @@ export const AgroHubMap = forwardRef<
     { data, isDrawing, onDrawingComplete, onCancelDrawing, selectedFieldId },
     ref
   ) => {
+    const { newField } = useSetNewField();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [fieldName, setFieldName] = useState("");
     const [fieldColor, setFieldColor] = useState("#3388ff");
@@ -122,7 +124,7 @@ export const AgroHubMap = forwardRef<
 
       const geoJson: GeoJSON.Polygon = {
         type: "Polygon",
-        coordinates: field.geometry,
+        coordinates: field.geometry.coordinates,
       };
       const layer = L.geoJSON(geoJson);
       const bounds = layer.getBounds();
@@ -142,22 +144,50 @@ export const AgroHubMap = forwardRef<
       drawnItemsRef.current.clearLayers();
       labelLayersRef.current.clearLayers();
 
-      allFields.forEach((field) => {
-        const geoJson: GeoJSON.Polygon = {
-          type: "Polygon",
-          coordinates: field.geometry,
-        };
+      allFields?.forEach((field) => {
+        // Проверяем, что geometry существует и содержит корректные данные
+        if (
+          !field.geometry ||
+          !field.geometry.coordinates ||
+          !Array.isArray(field.geometry.coordinates) ||
+          field.geometry.coordinates.length === 0
+        ) {
+          console.warn(
+            `Поле "${field.name}" имеет некорректную геометрию`,
+            field.geometry
+          );
+          return;
+        }
 
-        const layer = L.geoJSON(geoJson, {
-          style: { color: field.color, weight: 2, fillOpacity: 0.2 },
-        }) as L.Polygon;
+        try {
+          const layer = L.geoJSON(field.geometry as any, {
+            style: { color: field?.color, weight: 2, fillOpacity: 0.2 },
+          }) as L.Polygon;
 
-        drawnItemsRef.current!.addLayer(layer);
+          drawnItemsRef.current!.addLayer(layer);
 
-        const center = layer.getBounds().getCenter();
-        const labelIcon = L.divIcon({
-          className: "",
-          html: `<div style="
+          // Проверяем, что bounds существуют и валидны
+          const bounds = layer.getBounds();
+          if (!bounds || !bounds.isValid()) {
+            console.warn(`Поле "${field.name}" имеет некорректные границы`);
+            return;
+          }
+
+          const center = bounds.getCenter();
+
+          // Дополнительная проверка центра
+          if (
+            !center ||
+            typeof center.lat !== "number" ||
+            typeof center.lng !== "number"
+          ) {
+            console.warn(`Поле "${field.name}" имеет некорректный центр`);
+            return;
+          }
+
+          const labelIcon = L.divIcon({
+            className: "",
+            html: `<div style="
           background: white;
           padding: 4px 8px;
           border-radius: 4px;
@@ -174,20 +204,47 @@ export const AgroHubMap = forwardRef<
           text-align: center;
           pointer-events: none;
         ">${field.name}</div>`,
-          iconSize: [0, 0],
-        });
-        L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
+            iconSize: [0, 0],
+          });
+
+          L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
+        } catch (error) {
+          console.error(`Ошибка при отображении поля "${field.name}":`, error);
+        }
       });
 
-      if (isFirstLoad.current && allFields.length > 0) {
+      if (isFirstLoad.current && allFields?.length > 0) {
         const group = L.featureGroup();
+        let hasValidBounds = false;
+
         allFields.forEach((field) => {
-          group.addLayer(
-            L.geoJSON({ type: "Polygon", coordinates: field.geometry })
-          );
+          try {
+            if (field.geometry && field.geometry.coordinates) {
+              const layer = L.geoJSON(field.geometry as any);
+              const bounds = layer.getBounds();
+
+              // Добавляем слой в группу только если bounds валидны
+              if (bounds && bounds.isValid()) {
+                group.addLayer(layer);
+                hasValidBounds = true;
+              }
+            }
+          } catch (error) {
+            console.warn(
+              `Не удалось добавить поле "${field.name}" в группу:`,
+              error
+            );
+          }
         });
-        mapRef.current.fitBounds(group.getBounds(), { padding: [50, 50] });
-        isFirstLoad.current = false;
+
+        // Вызываем fitBounds только если есть валидные bounds
+        if (hasValidBounds) {
+          const groupBounds = group.getBounds();
+          if (groupBounds && groupBounds.isValid()) {
+            mapRef.current.fitBounds(groupBounds, { padding: [50, 50] });
+            isFirstLoad.current = false;
+          }
+        }
       }
     }, [allFields]);
 
@@ -202,46 +259,51 @@ export const AgroHubMap = forwardRef<
       const geoJsonFeature =
         pendingLayer.toGeoJSON() as GeoJSON.Feature<GeoJSON.Polygon>;
 
-      const newField: Field = {
+      const newFieldData: Field = {
         name,
         color,
-        geometry: geoJsonFeature.geometry.coordinates,
+        geometry: geoJsonFeature.geometry,
       };
 
-      const layer = L.geoJSON(geoJsonFeature, {
-        style: { color, weight: 2, fillOpacity: 0.2 },
-      }) as L.Polygon;
+      newField(newFieldData, {
+        onSuccess: () => {
+          const layer = L.geoJSON(geoJsonFeature, {
+            style: { color, weight: 2, fillOpacity: 0.2 },
+          }) as L.Polygon;
 
-      drawnItemsRef.current.addLayer(layer);
+          drawnItemsRef.current!.addLayer(layer);
 
-      const center = layer.getBounds().getCenter();
-      const labelIcon = L.divIcon({
-        className: "",
-        html: `<div style="
-      background: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: bold;
-      color: ${color};
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 120px;
-      width: max-content;
-      min-width: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-      text-align: center;
-      pointer-events: none;
-    ">${name}</div>`,
-        iconSize: [0, 0],
+          const center = layer.getBounds().getCenter();
+          const labelIcon = L.divIcon({
+            className: "",
+            html: `<div style="
+              background: white;
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 12px;
+              font-weight: bold;
+              color: ${color};
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 120px;
+              width: max-content;
+              min-width: 20px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+              text-align: center;
+              pointer-events: none;
+            ">${name}</div>`,
+            iconSize: [0, 0],
+          });
+          L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
+
+          onDrawingComplete(newFieldData);
+
+          setPendingLayer(null);
+          setIsModalOpen(false);
+        },
+        // onError уже обрабатывается в хуке useSetNewField
       });
-      L.marker(center, { icon: labelIcon }).addTo(labelLayersRef.current);
-
-      onDrawingComplete(newField);
-
-      setPendingLayer(null);
-      setIsModalOpen(false);
     };
 
     const handleCancelField = () => {
@@ -266,7 +328,7 @@ export const AgroHubMap = forwardRef<
             overflow: "hidden",
           }}
         >
-          <div id="map" style={{ height: "100%", width: "100%" }} />
+          <div id="map" style={{ height: "100%", width: "100%", zIndex: 1 }} />
         </div>
 
         <Modal

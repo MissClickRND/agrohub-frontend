@@ -1,24 +1,24 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
-import { newField } from "../../api";
+import { deleteField } from "../../api";
 
-export const useSetNewField = () => {
+export const useDeleteField = () => {
   const { showError, showSuccess } = useNotifications();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: newField,
+    mutationFn: deleteField,
     onSuccess: () => {
-      showSuccess("Поле успешно создано");
+      showSuccess("Поле успешно удалено");
       queryClient.invalidateQueries({ queryKey: ["fields"] });
     },
     onError: (error: Error) => {
-      showError(error.message || "Ошибка создания поля");
+      showError(error.message || "Ошибка удаления поля");
     },
   });
 
   return {
-    newField: mutation.mutate,
+    deleteField: mutation.mutate,
     isLoading: mutation.isPending,
     isError: mutation.isError,
     error: mutation.error?.message || null,

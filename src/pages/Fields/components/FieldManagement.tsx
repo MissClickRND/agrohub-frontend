@@ -42,12 +42,14 @@ export default function FieldManagement({
         </Flex>
       </Button>
       <Flex gap={8} px={16} direction="column">
-        {data.map((el) => (
+        {data?.map((el) => (
           <FieldTemplate
             key={el.id}
             data={el}
             isSelected={selectedFieldId === el.id}
-            onSelect={() => onFieldSelect(el?.id)}
+            onSelect={() => {
+              onFieldSelect(el?.id);
+            }}
           />
         ))}
       </Flex>

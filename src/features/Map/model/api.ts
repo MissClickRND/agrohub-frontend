@@ -3,7 +3,14 @@ import apiClient from "../../../app/api/axiosInstance";
 import { Field } from "./types";
 
 export const newField = async (body: Field) => {
-  const res = await apiClient.post(API + endpoints.NEW_FIELD, body);
+  const res = await apiClient.put(API + endpoints.NEW_FIELD, {
+    name: body.name,
+    color: body.color,
+    geometry: {
+      type: "Polygon",
+      coordinates: body.geometry.coordinates,
+    },
+  });
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка создания поля");
 };
@@ -13,4 +20,10 @@ export const getFields = async () => {
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка получения полей");
   return res.data;
+};
+
+export const deleteField = async (id: number | undefined) => {
+  const res = await apiClient.delete(API + endpoints.DELETE_FIELD + `/${id}`);
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка удаления поля");
 };
