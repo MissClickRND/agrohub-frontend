@@ -1,7 +1,16 @@
-import { Stack, Text, Flex, Button, Box } from "@mantine/core";
+import {
+  Stack,
+  Text,
+  Flex,
+  Button,
+  Box,
+  LoadingOverlay,
+  Loader,
+} from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { Field } from "../../../features/Map/model/types";
 import FieldTemplate from "./FieldTemplate";
+import { useGetFields } from "../../../features/Map/model/lib/hooks/useGetFields";
 
 export default function FieldManagement({
   onAddField,
@@ -14,8 +23,9 @@ export default function FieldManagement({
   onFieldSelect: (id: number | undefined) => void;
   selectedFieldId: number | undefined;
 }) {
+  const { isLoading } = useGetFields();
   return (
-    <Stack mih="100%" gap={0} w={400}>
+    <Stack h="94vh" gap={0} w={400}>
       <Flex
         justify="space-between"
         p={16}
@@ -31,7 +41,18 @@ export default function FieldManagement({
         </Box>
         Добавить поле
       </Button>
-      <Flex gap={8} px={16} direction="column">
+      <Flex
+        gap={8}
+        px={16}
+        pb={8}
+        direction="column"
+        pos="relative"
+        style={{ overflowY: "scroll" }}
+        h="100%"
+      >
+        <LoadingOverlay visible={isLoading}>
+          <Loader />
+        </LoadingOverlay>
         {data?.map((el) => (
           <FieldTemplate
             key={el?.id}

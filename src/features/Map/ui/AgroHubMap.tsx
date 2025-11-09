@@ -323,7 +323,7 @@ export const AgroHubMap = forwardRef<
             height: "100%",
             width: "100%",
             borderRadius: selectedFieldId
-              ? "0px 8px 0px 8px"
+              ? "0px 8px 0px 0px"
               : "0px 0px 8px 8px",
             overflow: "hidden",
           }}

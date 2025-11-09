@@ -23,6 +23,7 @@ export default function FieldTemplate({
   return (
     <>
       <ModalAcceptAction
+        subtitle="Это действие невозможно будет отменить"
         text={`Вы точно хотите удалить поле ${data.name}?`}
         onPass={onDelete}
         opened={opened}

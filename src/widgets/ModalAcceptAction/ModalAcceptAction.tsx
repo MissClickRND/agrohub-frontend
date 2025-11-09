@@ -4,9 +4,11 @@ export default function ModalAcceptAction({
   text,
   onPass,
   opened,
+  subtitle,
   close,
 }: {
   text: string;
+  subtitle?: string;
   onPass: () => void;
   opened: boolean;
   close: () => void;
@@ -21,7 +23,7 @@ export default function ModalAcceptAction({
     >
       <Text fz={24}>{text}</Text>
       <Text fz={14} c={"var(--subtitle)"}>
-        Это действие невозможно будет отменить
+        {subtitle}
       </Text>
       <Flex py={10} gap={10}>
         <Button color="red" onClick={close}>

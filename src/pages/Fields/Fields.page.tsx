@@ -37,7 +37,7 @@ const Fields = () => {
           isDrawing={isDrawing}
           onDrawingComplete={async (newField) => {
             setIsDrawing(false);
-          }} // потом перерендер
+          }}
           onCancelDrawing={() => setIsDrawing(false)}
           selectedFieldId={selectedFieldId}
         />
