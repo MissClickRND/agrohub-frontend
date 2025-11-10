@@ -20,12 +20,14 @@ import { useSetNewZone } from "../model/lib/hooks/useSetNewZone";
 export type AgroHubMapHandle = {
   startFieldDrawing: () => void;
   startZoneDrawing: () => void;
+  cancelDrawing: () => void;
 };
 
 type Props = {
   fields: Field[];
   zones: Zone[];
   selectedFieldId?: number;
+  onModeChange?: (mode: DrawMode) => void;
 };
 
 type DrawMode = "idle" | "field" | "zone";
@@ -34,27 +36,27 @@ const createLabelIcon = (text: string, color: string, fontSize = 12) =>
   L.divIcon({
     className: "",
     html: `<div style="
-              background: white;
-              padding: 4px 8px;
-              border-radius: 4px;
-              font-size: 12px;
-              font-weight: bold;
-              color: ${color};
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              max-width: 120px;
-              width: max-content;
-              min-width: 20px;
-              box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-              text-align: center;
-              pointer-events: none;
-            ">${text}</div>`,
+      background: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: ${fontSize}px;
+      font-weight: 600;
+      color: ${color};
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 160px;
+      width: max-content;
+      min-width: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.28);
+      text-align: center;
+      pointer-events: none;
+    ">${text}</div>`,
     iconSize: [0, 0],
   });
 
 export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
-  ({ fields, zones, selectedFieldId }, ref) => {
+  ({ fields, zones, selectedFieldId, onModeChange }, ref) => {
     const mapIdRef = useRef(
       `agrohub-map-${Math.random().toString(36).slice(2)}`
     );
@@ -68,12 +70,18 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
     const drawnItemsRef = useRef<L.FeatureGroup>(new L.FeatureGroup());
 
     const drawControlRef = useRef<any>(null);
+    const polygonHandlerRef = useRef<any>(null);
 
     const [mode, setMode] = useState<DrawMode>("idle");
-    const modeRef = useRef<DrawMode>("idle"); // <= всегда актуальный режим
+    const modeRef = useRef<DrawMode>("idle");
     useEffect(() => {
       modeRef.current = mode;
     }, [mode]);
+
+    const onModeChangeRef = useRef<Props["onModeChange"]>(undefined);
+    useEffect(() => {
+      onModeChangeRef.current = onModeChange;
+    }, [onModeChange]);
 
     const [pendingLayer, setPendingLayer] = useState<L.Polygon | null>(null);
 
@@ -88,8 +96,27 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
 
     const disableDrawing = () => {
       const handler =
+        polygonHandlerRef.current ??
         drawControlRef.current?._toolbars?.draw?._modes?.polygon?.handler;
-      if (handler?.disable) handler.disable();
+      if (!handler) return;
+      if (handler.disable) handler.disable();
+
+      // Жёсткая очистка временных элементов Leaflet.Draw
+      const map = mapRef.current;
+      try {
+        if (handler._poly && map?.hasLayer?.(handler._poly))
+          map.removeLayer(handler._poly);
+        if (handler._shape && map?.hasLayer?.(handler._shape))
+          map.removeLayer(handler._shape);
+        if (handler._markerGroup?.clearLayers)
+          handler._markerGroup.clearLayers();
+        if (Array.isArray(handler._markers)) {
+          handler._markers.forEach((m: any) => map?.removeLayer?.(m));
+          handler._markers = [];
+        }
+      } catch {
+        /* no-op */
+      }
     };
 
     useImperativeHandle(
@@ -98,19 +125,41 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
         startFieldDrawing: () => {
           if (!mapRef.current || !drawControlRef.current) return;
           setMode("field");
-          drawControlRef.current._toolbars.draw._modes.polygon.handler.enable();
+          modeRef.current = "field";
+          onModeChangeRef.current?.("field");
+          (
+            polygonHandlerRef.current ??
+            drawControlRef.current._toolbars.draw._modes.polygon.handler
+          )?.enable();
         },
         startZoneDrawing: () => {
           if (selectedFieldId == null) return; // нельзя рисовать зону без выбранного поля
           if (!mapRef.current || !drawControlRef.current) return;
           setMode("zone");
-          drawControlRef.current._toolbars.draw._modes.polygon.handler.enable();
+          modeRef.current = "zone";
+          onModeChangeRef.current?.("zone");
+          (
+            polygonHandlerRef.current ??
+            drawControlRef.current._toolbars.draw._modes.polygon.handler
+          )?.enable();
+        },
+        cancelDrawing: () => {
+          // Отмена с кнопки
+          disableDrawing();
+          if (pendingLayer) {
+            (drawnItemsRef.current as any).removeLayer(pendingLayer);
+            setPendingLayer(null);
+          }
+          setFieldModalOpen(false);
+          setZoneModalOpen(false);
+          setMode("idle");
+          modeRef.current = "idle";
+          onModeChangeRef.current?.("idle");
         },
       }),
-      [selectedFieldId]
+      [selectedFieldId, pendingLayer]
     );
 
-    // init map once
     useEffect(() => {
       const map = L.map(mapIdRef.current, {
         attributionControl: false,
@@ -123,7 +172,6 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
           '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      // порядок важен: лейблы поверх
       fieldsLayerRef.current.addTo(map);
       zonesLayerRef.current.addTo(map);
       fieldsLabelsRef.current.addTo(map);
@@ -150,12 +198,15 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
       });
       map.addControl(drawControl);
       drawControlRef.current = drawControl;
+      polygonHandlerRef.current = (
+        drawControl as any
+      )?._toolbars?.draw?._modes?.polygon?.handler;
 
       // скрываем UI draw
       const container = (drawControl as any).getContainer?.();
       if (container) (container as HTMLElement).style.display = "none";
 
-      // ВАЖНО: используем modeRef, а не замыкание на старом mode
+      // создаём временный слой, выключаем рисование и открываем нужную модалку
       map.on((L as any).Draw.Event.CREATED, (e: any) => {
         const layer = e.layer as L.Polygon;
         // временный серый стиль до подтверждения
@@ -273,6 +324,7 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
       setPendingLayer(null);
       setMode("idle");
       modeRef.current = "idle";
+      onModeChangeRef.current?.("idle");
       disableDrawing();
     };
 

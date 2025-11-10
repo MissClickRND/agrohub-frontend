@@ -9,33 +9,34 @@ import {
 } from "@mantine/core";
 import FieldTemplate from "./FieldTemplate";
 import { Field } from "../../../features/Map/model/types";
-import { IconPlus } from "@tabler/icons-react";
-import styles from "../classes/FieldManagement.module.css";
+import { IconPlus, IconX } from "@tabler/icons-react";
 
 export default function FieldManagement({
   data,
   isLoading,
   selectedFieldId,
   onFieldSelect,
-  onAddField,
+  isFieldDrawing,
+  onToggleFieldDrawing,
 }: {
   data: Field[];
   isLoading: boolean;
   selectedFieldId?: number;
   onFieldSelect: (id?: number) => void;
-  onAddField: () => void;
+  isFieldDrawing: boolean;
+  onToggleFieldDrawing: () => void;
 }) {
   return (
     <Box p={12} pb={0} w={280}>
       <Button
         fullWidth
         mb={12}
-        onClick={onAddField}
-        color="primary.4"
+        onClick={onToggleFieldDrawing}
+        color={isFieldDrawing ? "red" : "primary.4"}
         radius={8}
       >
-        <IconPlus />
-        Добавить поле
+        {isFieldDrawing ? <IconX /> : <IconPlus />}
+        {isFieldDrawing ? "Отменить" : "Создать поле"}
       </Button>
 
       <Text fw={600} mb={8}>
