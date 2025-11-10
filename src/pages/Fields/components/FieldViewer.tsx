@@ -6,6 +6,7 @@ import {
   ScrollArea,
   Stack,
   Badge,
+  ActionIcon,
 } from "@mantine/core";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { Field, Zone } from "../../../features/Map/model/types";
@@ -14,6 +15,8 @@ import {
   AgroHubMapHandle,
 } from "../../../features/Map/ui/AgroHubMap";
 import { useGetZones } from "../../../features/Map/model/lib/hooks/useGetZones";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
+import ZoneTemplate from "./ZoneTemplate";
 
 export type FieldViewerHandle = {
   startFieldDrawing: () => void;
@@ -58,6 +61,7 @@ const FieldViewer = forwardRef<
               radius="8px"
               onClick={() => mapRef.current?.startZoneDrawing()}
             >
+              <IconPlus />
               Добавить зону
             </Button>
           </Flex>
@@ -81,6 +85,7 @@ const FieldViewer = forwardRef<
               fields={fields}
               zones={zones}
               selectedFieldId={selectedFieldId}
+              style={{ zIndex: 1 }}
             />
           </Box>
 
@@ -102,7 +107,7 @@ const FieldViewer = forwardRef<
               >
                 Зоны поля
               </Text>
-              <ScrollArea h={"calc(100% - 58px)"} p={12}>
+              <ScrollArea h={"calc(100% - 60px)"} p={12}>
                 <Stack gap={8}>
                   {zones.length === 0 && (
                     <Text c="dimmed" px={4}>
@@ -110,29 +115,7 @@ const FieldViewer = forwardRef<
                     </Text>
                   )}
                   {zones.map((z: Zone) => (
-                    <Box
-                      key={z.id ?? z.name}
-                      p={10}
-                      bd={"1px solid var(--white-gray)"}
-                      bdrs={8}
-                    >
-                      <Text fw={600}>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: 10,
-                            height: 10,
-                            borderRadius: 2,
-                            background: z.color,
-                            marginRight: 8,
-                          }}
-                        />
-                        {z.name}
-                      </Text>
-                      <Badge mt={6} variant="light">
-                        Площадь: {z.area ?? "—"}
-                      </Badge>
-                    </Box>
+                    <ZoneTemplate data={z} />
                   ))}
                 </Stack>
               </ScrollArea>

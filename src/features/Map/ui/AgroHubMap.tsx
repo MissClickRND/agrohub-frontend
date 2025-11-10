@@ -34,9 +34,22 @@ const createLabelIcon = (text: string, color: string, fontSize = 12) =>
   L.divIcon({
     className: "",
     html: `<div style="
-      background:white;padding:4px 8px;border-radius:4px;font-size:${fontSize}px;font-weight:600;
-      color:${color};white-space:nowrap;max-width:160px;box-shadow:0 1px 3px rgba(0,0,0,.28);
-      pointer-events:none;text-align:center;">${text}</div>`,
+              background: white;
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 12px;
+              font-weight: bold;
+              color: ${color};
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 120px;
+              width: max-content;
+              min-width: 20px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+              text-align: center;
+              pointer-events: none;
+            ">${text}</div>`,
     iconSize: [0, 0],
   });
 
@@ -347,6 +360,7 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
               ? "0px 8px 0px 0px"
               : "0px 0px 8px 8px",
             overflow: "hidden",
+            zIndex: 1,
           }}
         />
 

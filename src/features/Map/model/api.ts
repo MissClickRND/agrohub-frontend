@@ -1,5 +1,5 @@
-import { API, endpoints } from "../../../shared/configs/apiConfigs";
 import apiClient from "../../../app/api/axiosInstance";
+import { API, endpoints } from "../../../shared/configs/apiConfigs";
 import { Field, Zone } from "./types";
 
 export const newField = async (body: Field) => {
@@ -54,4 +54,10 @@ export const getZones = async (id: number): Promise<Zone[]> => {
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка получения зон поля");
   return res.data;
+};
+
+export const deleteZone = async (id: number | undefined) => {
+  const res = await apiClient.delete(API + endpoints.DELETE_ZONE + `/${id}`);
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка удаления зоны");
 };

@@ -11,4 +11,5 @@ export const endpoints = {
 
   NEW_ZONE: "/api/fields",
   GET_ZONES: "/api/fields",
+  DELETE_ZONE: "/api/fields/zone/delete",
 };

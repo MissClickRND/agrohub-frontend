@@ -18,6 +18,7 @@ export default function FieldTemplate({
   const { deleteField } = useDeleteField();
   const onDelete = () => {
     deleteField(data.id);
+    close();
   };
 
   return (
