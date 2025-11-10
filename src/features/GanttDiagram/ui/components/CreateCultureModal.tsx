@@ -1,8 +1,9 @@
-import { Button, Group, Modal, Text } from "@mantine/core";
+import { Button, Group, Modal, Select, Text } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
+import { useGetCulture } from "../../model/lib/hooks/useGetCultures";
 
 type CreateValues = {
   text: string;
@@ -25,6 +26,7 @@ export default function CreateCultureModal({
     end: Date;
   }) => Promise<void> | void;
 }) {
+  const { cultures } = useGetCulture();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const form = useForm<CreateValues>({
@@ -49,7 +51,7 @@ export default function CreateCultureModal({
         setSubmitError(null);
         onClose();
       }}
-      title="Создание задачи"
+      title="Создание записи культуры"
       centered
       size="lg"
     >
@@ -68,17 +70,22 @@ export default function CreateCultureModal({
           }
         })}
       >
-        <TextInput
+        <Select
           label="Название"
-          placeholder="Например, Полив"
+          placeholder="Например, Пшеница"
           key={form.key("text")}
           {...form.getInputProps("text")}
+          data={cultures.map((culture) => ({
+            value: String(culture.id),
+            label: culture.name,
+          }))}
           mb="md"
           required
         />
 
         <Group grow gap="md" mb="sm">
           <DatePickerInput
+            placeholder="От"
             label="Дата начала"
             value={form.values.start}
             onChange={(v) => form.setFieldValue("start", v)}
@@ -87,6 +94,7 @@ export default function CreateCultureModal({
             clearable
           />
           <DatePickerInput
+            placeholder="До"
             label="Дата окончания"
             value={form.values.end}
             onChange={(v) => form.setFieldValue("end", v)}

@@ -15,5 +15,6 @@ export const endpoints = {
 
   GET_LOGS: (id: number) => `/api/culture/${id}/list`,
   NEW_LOG: "/api/culture/create",
+  UPDATE_LOG: (id: number) => `/api/culture/update/${id}`,
   CULTURES_LIST: "/api/culture/list",
 };

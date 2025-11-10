@@ -21,3 +21,8 @@ export type UpdateTaskPayload = {
   end?: Date;
   parent?: number;
 };
+
+export type Culture = {
+  id: number;
+  name: string;
+};

@@ -1,8 +1,9 @@
-import { Button, Group, Modal, Text } from "@mantine/core";
+import { Button, Group, Modal, Select, Text } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
+import { useGetCulture } from "../../model/lib/hooks/useGetCultures";
 
 type EditValues = {
   text: string;
@@ -28,7 +29,7 @@ export default function EditCultureModal({
   initial: { text: string; start: Date | null; end: Date | null };
 }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
-
+  const { cultures } = useGetCulture();
   const form = useForm<EditValues>({
     mode: "uncontrolled",
     initialValues: {
@@ -90,17 +91,22 @@ export default function EditCultureModal({
           }
         })}
       >
-        <TextInput
+        <Select
           label="Название"
-          placeholder="Введите название"
+          placeholder="Например, Пшеница"
           key={form.key("text")}
           {...form.getInputProps("text")}
+          data={cultures.map((culture) => ({
+            value: String(culture.id),
+            label: culture.name,
+          }))}
           mb="md"
           required
         />
 
         <Group grow gap="md" mb="sm">
           <DatePickerInput
+            placeholder="От"
             label="Дата начала"
             value={form.values.start}
             onChange={(v) => form.setFieldValue("start", v)}
@@ -109,6 +115,7 @@ export default function EditCultureModal({
             clearable
           />
           <DatePickerInput
+            placeholder="До"
             label="Дата окончания"
             value={form.values.end}
             onChange={(v) => form.setFieldValue("end", v)}

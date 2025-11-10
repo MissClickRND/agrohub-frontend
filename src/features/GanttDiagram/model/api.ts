@@ -1,0 +1,44 @@
+import apiClient from "../../../app/api/axiosInstance";
+import { API, endpoints } from "../../../shared/configs/apiConfigs";
+import { Culture, GanttTask } from "./types";
+
+export const getCulturesList = async (): Promise<Culture[]> => {
+  const res = await apiClient.get(API + endpoints.CULTURES_LIST);
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка получения культур");
+  return res.data;
+};
+
+export const getCultureLogs = async (id: number): Promise<Culture[]> => {
+  const res = await apiClient.get(API + endpoints.GET_LOGS(id));
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка получения записей");
+  return res.data;
+};
+
+export const newLog = async (body: GanttTask) => {
+  const res = await apiClient.put(API + endpoints.NEW_FIELD, {
+    zoneId: body.parent,
+    cultureId: body.text,
+    createdAt: body.start,
+    endAt: body.end,
+  });
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка создания записи");
+};
+
+export const updateLog = async ({
+  body,
+  id,
+}: {
+  body: GanttTask;
+  id: number;
+}) => {
+  const res = await apiClient.post(API + endpoints.UPDATE_LOG(id), {
+    cultureId: body.text,
+    createdAt: body.start,
+    endAt: body.end,
+  });
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка обновления записи");
+};
