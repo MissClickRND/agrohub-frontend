@@ -21,7 +21,10 @@ export default function JournalCultures() {
         onFieldSelect={setSelectedFieldId}
       />
 
-      <GanttDiagram />
+      <GanttDiagram
+        isLoading={isLoading}
+        data={fields.find((el) => el.id === selectedFieldId)}
+      />
     </Flex>
   );
 }

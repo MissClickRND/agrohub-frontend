@@ -1,11 +1,9 @@
 .header {
   border: 2px solid #e6e6e6;
-  /* border-radius: 8px 8px 0 0; */
-  border-top: 0;
+  border-radius: 8px 8px 0 0;
   border-bottom: 0;
 }
 
-/* Контейнер диаграммы */
 .ganttShell {
   height: 85.8vh;
   border: 2px solid #e6e6e6;
@@ -13,14 +11,10 @@
   overflow: hidden;
 }
 
-/* Обёртка для Toolbar. Внутри используем :global, чтобы достучаться до классов библиотеки */
 .toolbarRight {
   display: flex;
   width: 100%;
 }
-
-/* На разных версиях SVAR классы могут немного отличаться.
-   Ниже — безопасные селекторы для типичных вариантов. */
 .toolbarRight :global(.wx-toolbar),
 .toolbarRight :global(.wx-gantt-toolbar),
 .toolbarRight :global(.wx-toolbar__content),
@@ -29,9 +23,63 @@
   justify-content: flex-end !important;
   width: 100%;
 }
-
-/* Доп. косметика: расстояние между кнопками тулбара */
 .toolbarRight :global(.wx-toolbar .wx-button),
 .toolbarRight :global(.wx-gantt-toolbar .wx-button) {
   margin-left: 8px;
+}
+
+/* ====== Простая модалка без внешних зависимостей (поверх Mantine Overlay) ====== */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 30, 0.45);
+  z-index: 10000; /* выше контейнера диаграммы */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  padding: 18px;
+}
+
+.field {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.input {
+  width: 100%;
+  height: 38px;
+  border: 1px solid #e2e4ea;
+  border-radius: 8px;
+  padding: 0 12px;
+  outline: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.dateInput :global(input) {
+  height: 38px;
+  border-radius: 8px;
+}
+
+/* Чуть компактнее ряды в диаграмме */
+:global(.wx-gantt__row) {
+  padding: 0 !important;
 }

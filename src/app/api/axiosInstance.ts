@@ -42,6 +42,7 @@ apiClient.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem("refresh_token");
         if (!refreshToken) {
+          window.location.href = "/auth/login";
           throw new Error("No refresh token");
         }
 
@@ -61,7 +62,7 @@ apiClient.interceptors.response.use(
         // Очищаем токены при ошибке обновления
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        window.location.href = "/auth/login";
+        // window.location.href = "/auth/login";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
