@@ -1,4 +1,4 @@
-export const API = "http://localhost:4000";
+export const API = "http://26.118.155.2:4000";
 
 export const endpoints = {
   LOGIN: "/api/auth/login",
