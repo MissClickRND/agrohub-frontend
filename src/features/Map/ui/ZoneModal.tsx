@@ -40,6 +40,7 @@ export default function ZoneModal({
         value={name}
         onChange={(e) => setName(e.currentTarget.value)}
         autoFocus
+        required
       />
       <ColorPicker
         value={color}
@@ -58,9 +59,11 @@ export default function ZoneModal({
       />
       <Group mt="md">
         <Button
-          onClick={() =>
-            onSubmit({ name: name.trim() || "Без названия", color })
-          }
+          onClick={() => {
+            if (name.trim().length !== 0) {
+              onSubmit({ name: name.trim() || "Без названия", color });
+            }
+          }}
         >
           Создать
         </Button>

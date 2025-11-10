@@ -1,4 +1,4 @@
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import MainLayout from "../../../../layouts/MainLayout/MainLayout";
 import Main from "../../../../pages/Main/Main.page";
@@ -11,52 +11,52 @@ import JournalCultures from "../../../../pages/JournalCultures/JournalCultures.p
 import GroundsPage from "../../../../pages/Grounds/Grounds.page.tsx";
 
 const router = createBrowserRouter([
-    {
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [
+      {
         path: "/",
-        element: <MainLayout/>,
-        children: [
-            {
-                path: "/main",
-                element: <Main/>,
-            },
-            {
-                path: "/fields",
-                element: <Fields/>,
-            },
-            {
-                path: "/journals",
-                element: <JournalCultures/>,
-            },
-            {
-                path: "/chat-ai",
-                element: <ChatAI/>,
-            },
-            {
-                path: "/ground",
-                element: <GroundsPage/>,
-            },
-        ],
-    },
-    {
-        path: "/auth",
-        element: <AuthLayout/>,
-        children: [
-            {
-                path: "/auth/login",
-                element: <Login/>,
-            },
-            {
-                path: "/auth/register",
-                element: <></>,
-            },
-        ],
-    },
-    {
-        path: "*",
-        element: <Error404/>,
-    },
+        element: <Main />,
+      },
+      {
+        path: "/fields",
+        element: <Fields />,
+      },
+      {
+        path: "/journals",
+        element: <JournalCultures />,
+      },
+      {
+        path: "/chat-ai",
+        element: <ChatAI />,
+      },
+      {
+        path: "/ground",
+        element: <GroundsPage />,
+      },
+    ],
+  },
+  {
+    path: "/auth",
+    element: <AuthLayout />,
+    children: [
+      {
+        path: "/auth/login",
+        element: <Login />,
+      },
+      {
+        path: "/auth/register",
+        element: <></>,
+      },
+    ],
+  },
+  {
+    path: "*",
+    element: <Error404 />,
+  },
 ]);
 
 export function Router() {
-    return <RouterProvider router={router}/>;
+  return <RouterProvider router={router} />;
 }

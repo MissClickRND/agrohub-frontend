@@ -166,6 +166,17 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
       }).setView([55.751244, 37.618423], 8);
       mapRef.current = map;
 
+      // L.tileLayer
+      //   .wms("http://26.118.155.2:8080/?", {
+      //     layers: "ORTOPLAN_RF",
+      //     format: "image/png",
+      //     transparent: true,
+      //     version: "1.3.0",
+      //     attribution: "QGIS WMS Server",
+      //     opacity: 0.8,
+      //   })
+      //   .addTo(map);
+
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution:

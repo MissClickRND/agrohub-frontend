@@ -1,0 +1,24 @@
+.navRoot {
+  position: fixed;
+  inset-inline-start: 0;
+  height: calc(100dvh - var(--header-h, 60px));
+  /* var() для гибкости: */
+  top: var(--header-h, 60px);
+  z-index: 500;
+  pointer-events: auto;
+}
+
+.navPaper {
+  height: 100%;
+  background: var(--mantine-color-body);
+  border-inline-end: 1px solid var(--mantine-color-default-border);
+  box-shadow: var(--mantine-shadow-md);
+  overflow: hidden; /* чтобы контент красиво маскировался при сжатии */
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 490;
+  background: var(--mantine-color-black);
+}
