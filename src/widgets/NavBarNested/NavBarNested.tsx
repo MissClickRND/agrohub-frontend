@@ -1,30 +1,58 @@
-﻿import {ScrollArea, Stack, Text} from '@mantine/core';
-import classes from './NavBarNested.module.css';
-import {LinksGroup} from './components/NavBarLinksGroup.tsx';
-import navbarLinks from "./navbarLinks.tsx";
+﻿import { NavLink, useLocation } from "react-router-dom";
+import { ActionIcon, Stack, Tooltip } from "@mantine/core";
+import classes from "./classes/NavBarNested.module.css";
+import navbarLinks from "./navbarLinks";
+import { LinksGroup } from "./components/NavBarLinksGroup";
 
-type Props = {
-    show: boolean;
-};
+type Props = { expanded: boolean };
 
-export function NavbarNested({show}: Props) {
-    const links = navbarLinks.map((item) => (
-        <LinksGroup {...item} key={item.label}/>
-    ));
+export default function NavbarNested({ expanded }: Props) {
+  const location = useLocation();
 
-    return show ? (
-        <nav className={classes.navbar}>
-            <div className={classes.header}>
-                <Text fw={500} fz={18}>
-                    Навигация
-                </Text>
-            </div>
+  if (!expanded) {
+    // только иконки
+    return (
+      <nav className={classes.railRoot}>
+        <Stack gap={8} align="center" justify="start">
+          {navbarLinks.map((item) => {
+            const active = item.link && location.pathname === item.link;
+            return (
+              <Tooltip
+                key={item.label}
+                label={item.label}
+                position="right"
+                withArrow
+              >
+                <ActionIcon
+                  component={NavLink as any}
+                  to={item.link ?? "#"}
+                  size="lg"
+                  radius="md"
+                  variant={active ? "filled" : "light"}
+                  className={classes.railIcon}
+                  aria-label={item.label}
+                  color="var(--main-color)"
+                >
+                  {item.icon}
+                </ActionIcon>
+              </Tooltip>
+            );
+          })}
+        </Stack>
+      </nav>
+    );
+  }
 
-            <ScrollArea className={classes.links}>
-                <Stack px={20}>{links}</Stack>
-            </ScrollArea>
+  // развернуто: текстовые пункты/группы
+  return (
+    <nav className={classes.navbar}>
+      <Stack p={16} className={classes.linksInner}>
+        {navbarLinks.map((item) => (
+          <LinksGroup {...item} key={item.label} />
+        ))}
+      </Stack>
 
-            <div className={classes.footer}></div>
-        </nav>
-    ) : null;
+      <div className={classes.footer} />
+    </nav>
+  );
 }

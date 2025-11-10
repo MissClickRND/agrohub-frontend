@@ -11,8 +11,8 @@ type Props = {
 function NavBarButton({ children, onClick, isSelected }: Props) {
   return (
     <UnstyledButton
-      bg={isSelected ? "primary.4" : "white"}
-      c={isSelected ? "white" : "black"}
+      bg={isSelected ? "primary.4" : "#ecf8eb"}
+      c={isSelected ? "white" : "primary.3"}
       className={classes.navBarButton}
       onClick={(e) => onClick(e.nativeEvent)}
     >

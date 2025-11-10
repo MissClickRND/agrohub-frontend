@@ -1,7 +1,4 @@
 ﻿.navBarButton {
-    @mixin hover {
-        opacity: 0.6;
-    }
-    display: block;
-    border-radius: 8px;
+  display: block;
+  border-radius: 8px;
 }

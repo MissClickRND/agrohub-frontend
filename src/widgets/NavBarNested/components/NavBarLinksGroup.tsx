@@ -76,7 +76,7 @@ export function LinksGroup({
             {/*@ts-ignore*/}
             {React.cloneElement(icon)}
             <Box ml="md">
-              <Text fw={600} fz={13}>
+              <Text fw={600} fz={13} style={{ textWrap: "nowrap" }}>
                 {label}
               </Text>
             </Box>
