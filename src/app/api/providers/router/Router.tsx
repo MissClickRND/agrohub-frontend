@@ -7,6 +7,7 @@ import Error404 from "../../../../pages/Errors/Error404/Error404.page";
 import AuthLayout from "../../../../layouts/AuthLayout/AuthLayout";
 import Login from "../../../../pages/Auth/Login/Login";
 import Fields from "../../../../pages/Fields/Fields.page";
+import { CalculatorPage } from "../../../../pages/Calculator/ui/Calculator.Page";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
         path: "/chat-ai",
         element: <ChatAI />,
       },
+      {
+        path: "/calculator",
+        element: <CalculatorPage />
+      }
     ],
   },
   {

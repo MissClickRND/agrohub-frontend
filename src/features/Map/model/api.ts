@@ -16,7 +16,7 @@ export const newField = async (body: Field) => {
 };
 
 export const getFields = async () => {
-  const res = await apiClient.get(API + endpoints.GET_FIELDS);
+  const res = await apiClient.get<Field[]>(API + endpoints.GET_FIELDS);
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка получения полей");
   return res.data;

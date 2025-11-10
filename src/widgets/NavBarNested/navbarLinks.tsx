@@ -28,7 +28,7 @@ const navbarLinks = [
     },
     {
         label: 'Калькулятор',
-        link: '/calc',
+        link: '/calculator',
         icon: <IconCalculatorOff/>,
     },
     {
