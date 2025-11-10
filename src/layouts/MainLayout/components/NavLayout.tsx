@@ -11,6 +11,7 @@ export default function NavLayout() {
     { name: "Поля", link: "/fields" },
     { name: "AI чат", link: "/chat-ai" },
     { name: "Логин", link: "/auth/login" },
+    { name: "калькулятор", link: "/calculator"}
   ];
 
   return (

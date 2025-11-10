@@ -9,6 +9,7 @@ import Login from "../../../../pages/Auth/Login/Login";
 import Fields from "../../../../pages/Fields/Fields.page";
 import JournalCultures from "../../../../pages/JournalCultures/JournalCultures.page";
 import GroundsPage from "../../../../pages/Grounds/Grounds.page.tsx";
+import { CalculatorPage } from "../../../../pages/Calculator/ui/Calculator.Page";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
         path: "/ground",
         element: <GroundsPage />,
       },
+      {
+        path: "/calculator",
+        element: <CalculatorPage />,
+      }
     ],
   },
   {
