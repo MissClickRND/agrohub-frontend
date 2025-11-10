@@ -1,0 +1,37 @@
+.header {
+  border: 2px solid #e6e6e6;
+  /* border-radius: 8px 8px 0 0; */
+  border-top: 0;
+  border-bottom: 0;
+}
+
+/* Контейнер диаграммы */
+.ganttShell {
+  height: 85.8vh;
+  border: 2px solid #e6e6e6;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+/* Обёртка для Toolbar. Внутри используем :global, чтобы достучаться до классов библиотеки */
+.toolbarRight {
+  display: flex;
+  width: 100%;
+}
+
+/* На разных версиях SVAR классы могут немного отличаться.
+   Ниже — безопасные селекторы для типичных вариантов. */
+.toolbarRight :global(.wx-toolbar),
+.toolbarRight :global(.wx-gantt-toolbar),
+.toolbarRight :global(.wx-toolbar__content),
+.toolbarRight :global(.wx-gantt-toolbar__content) {
+  display: flex !important;
+  justify-content: flex-end !important;
+  width: 100%;
+}
+
+/* Доп. косметика: расстояние между кнопками тулбара */
+.toolbarRight :global(.wx-toolbar .wx-button),
+.toolbarRight :global(.wx-gantt-toolbar .wx-button) {
+  margin-left: 8px;
+}
