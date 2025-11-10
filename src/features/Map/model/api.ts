@@ -23,7 +23,7 @@ export const getFields = async (): Promise<Field[]> => {
 };
 
 export const deleteField = async (id: number | undefined) => {
-  const res = await apiClient.delete(API + endpoints.DELETE_FIELD + `/${id}`);
+  const res = await apiClient.delete(API + endpoints.DELETE_FIELD(id));
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка удаления поля");
 };
@@ -35,7 +35,7 @@ export const newZone = async ({
   body: Zone;
   id: number | undefined;
 }) => {
-  const res = await apiClient.put(API + endpoints.NEW_ZONE + `/${id}/create`, {
+  const res = await apiClient.put(API + endpoints.NEW_ZONE(id), {
     name: body.name,
     color: body.color,
     geometry: {
@@ -48,16 +48,14 @@ export const newZone = async ({
 };
 
 export const getZones = async (id: number): Promise<Zone[]> => {
-  const res = await apiClient.get(
-    API + endpoints.GET_ZONES + `/${id}/zones/list`
-  );
+  const res = await apiClient.get(API + endpoints.GET_ZONES(id));
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка получения зон поля");
   return res.data;
 };
 
 export const deleteZone = async (id: number | undefined) => {
-  const res = await apiClient.delete(API + endpoints.DELETE_ZONE + `/${id}`);
+  const res = await apiClient.delete(API + endpoints.DELETE_ZONE(id));
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка удаления зоны");
 };

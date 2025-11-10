@@ -1,5 +1,5 @@
 import { Flex } from "@mantine/core";
-import GanttDiagram from "../../features/GanttDiagram/GanttDiagram";
+import GanttDiagram from "../../features/GanttDiagram/ui/GanttDiagram";
 import JournalFieldsManagement from "./components/JournalFieldsManagement";
 import { useEffect, useState } from "react";
 import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields";

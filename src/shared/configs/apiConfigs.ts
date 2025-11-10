@@ -7,9 +7,13 @@ export const endpoints = {
 
   GET_FIELDS: "/api/fields/list",
   NEW_FIELD: "/api/fields/create",
-  DELETE_FIELD: "/api/fields/delete",
+  DELETE_FIELD: (id: number | undefined) => `/api/fields/delete/${id}`,
 
-  NEW_ZONE: "/api/fields",
-  GET_ZONES: "/api/fields",
-  DELETE_ZONE: "/api/fields/zone/delete",
+  NEW_ZONE: (id: number | undefined) => `/api/fields/${id}/create`,
+  GET_ZONES: (id: number) => `/api/fields/${id}/zones/list`,
+  DELETE_ZONE: (id: number | undefined) => `/api/fields/zone/delete/${id}`,
+
+  GET_LOGS: (id: number) => `/api/culture/${id}/list`,
+  NEW_LOG: "/api/culture/create",
+  CULTURES_LIST: "/api/culture/list",
 };
