@@ -37,11 +37,10 @@ a {
   box-sizing: border-box !important;
 }
 
-/* Пунктирная линия направления — частая, скруглённая */
 .leaflet-draw-guide-dash {
   stroke: #3388ff !important;
   stroke-width: 2 !important;
-  stroke-dasharray: 4, 4 !important; /* ← штрих 4px, пробел 4px */
+  stroke-dasharray: 4, 4 !important;
   stroke-linecap: round !important;
 }
 
@@ -58,7 +57,7 @@ a {
   border-radius: 4px;
   font-size: 12px;
   font-weight: bold;
-  color: #3388ff; /* будет переопределяться через inline-style */
+  color: #3388ff;
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   text-align: center;

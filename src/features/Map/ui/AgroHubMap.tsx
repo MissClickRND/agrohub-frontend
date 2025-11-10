@@ -364,19 +364,16 @@ export const AgroHubMap = forwardRef<AgroHubMapHandle, Props>(
           }}
         />
 
-        {/* Модалки отдельными компонентами */}
         <FieldModal
           opened={fieldModalOpen}
           onCancel={cancelModal}
           onSubmit={confirmCreateField}
-          defaultName={`Поле ${fields.length + 1}`}
           defaultColor={"#3388ff"}
         />
         <ZoneModal
           opened={zoneModalOpen}
           onCancel={cancelModal}
           onSubmit={confirmCreateZone}
-          defaultName={`Зона ${(zones?.length ?? 0) + 1}`}
           defaultColor={"#ff9800"}
         />
       </>

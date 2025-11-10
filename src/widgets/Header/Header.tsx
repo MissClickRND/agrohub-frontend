@@ -44,6 +44,7 @@ function Header({ burgerOpened, burgerToggle }: Props) {
                 size={16}
                 opened={burgerOpened}
                 onClick={burgerToggle}
+                hiddenFrom="sm"
               />
               <Box visibleFrom={"sm"}>
                 <AgrohubSpotlightButton onClick={spotlight.open} />

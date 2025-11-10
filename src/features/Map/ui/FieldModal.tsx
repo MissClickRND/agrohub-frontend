@@ -14,7 +14,7 @@ export default function FieldModal({
   onCancel,
   onSubmit,
   defaultName = "",
-  defaultColor = "#3388ff",
+  defaultColor = "var(--main-color)",
 }: Props) {
   const [name, setName] = useState(defaultName);
   const [color, setColor] = useState(defaultColor);
@@ -30,20 +30,30 @@ export default function FieldModal({
     <Modal
       opened={opened}
       onClose={onCancel}
-      title="Новое поле"
+      title="Создание нового поля"
       centered
       zIndex={9999}
     >
       <TextInput
         label="Название"
         value={name}
+        placeholder="Введите уникальное имя вашего поля"
         onChange={(e) => setName(e.currentTarget.value)}
         autoFocus
       />
       <ColorPicker
         value={color}
+        w="100%"
         onChange={setColor}
-        swatches={["#3388ff", "#ff5555", "#4caf50", "#ff9800", "#9c27b0"]}
+        swatches={[
+          "#3388ff",
+          "#fbff00",
+          "#ff5555",
+          "#ff7b00",
+          "#4caf50",
+          "#ff9800",
+          "#9c27b0",
+        ]}
         mt="md"
       />
       <Group mt="md">

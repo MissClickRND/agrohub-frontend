@@ -30,20 +30,30 @@ export default function ZoneModal({
     <Modal
       opened={opened}
       onClose={onCancel}
-      title="Новая зона"
+      title="Создание зоны"
       centered
       zIndex={9999}
     >
       <TextInput
         label="Название"
+        placeholder="Введите уникальное имя зоны поля"
         value={name}
         onChange={(e) => setName(e.currentTarget.value)}
         autoFocus
       />
       <ColorPicker
         value={color}
+        w="100%"
         onChange={setColor}
-        swatches={["#ff9800", "#ff5555", "#4caf50", "#3388ff", "#9c27b0"]}
+        swatches={[
+          "#3388ff",
+          "#fbff00",
+          "#ff5555",
+          "#ff7b00",
+          "#4caf50",
+          "#ff9800",
+          "#9c27b0",
+        ]}
         mt="md"
       />
       <Group mt="md">
