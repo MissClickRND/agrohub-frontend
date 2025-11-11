@@ -51,7 +51,7 @@ export default function CreateCultureModal({
     mode: "uncontrolled",
     initialValues: { text: "", idParents: "", start: null, end: null },
     validate: {
-      text: (v) => (v.trim() ? null : "Укажите название задачи"),
+      text: (v) => (v ? null : "Укажите название записи"),
       start: (v) => (v ? null : "Выберите дату начала"),
       idParents: (v) => (v.trim() ? null : "Выберите зону"),
       end: (v, values) => {
@@ -117,6 +117,7 @@ export default function CreateCultureModal({
             placeholder="От"
             label="Дата начала"
             value={form.values.start}
+            // @ts-ignore
             onChange={(v) => form.setFieldValue("start", v)}
             error={form.errors.start}
             required
@@ -126,6 +127,7 @@ export default function CreateCultureModal({
             placeholder="До"
             label="Дата окончания"
             value={form.values.end}
+            // @ts-ignore
             onChange={(v) => form.setFieldValue("end", v)}
             error={form.errors.end}
             required

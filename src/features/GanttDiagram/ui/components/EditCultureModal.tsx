@@ -1,12 +1,11 @@
 import { Button, Group, Modal, Select, Text } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import { TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { useGetCulture } from "../../model/lib/hooks/useGetCultures";
+import { Culture } from "../../model/types";
 
 type EditValues = {
-  text: string;
+  text: string; // здесь хранится ID культуры как строка
   start: Date | null;
   end: Date | null;
 };
@@ -17,6 +16,7 @@ export default function EditCultureModal({
   onClose,
   onSubmit,
   initial,
+  cultures,
 }: {
   opened: boolean;
   submitting: boolean;
@@ -27,13 +27,18 @@ export default function EditCultureModal({
     end: Date;
   }) => Promise<void> | void;
   initial: { text: string; start: Date | null; end: Date | null };
+  cultures: Culture[];
 }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { cultures } = useGetCulture();
+
+  // Преобразуем initial.text в строку, если это число
+  const initialText =
+    typeof initial.text === "number" ? String(initial.text) : initial.text;
+
   const form = useForm<EditValues>({
     mode: "uncontrolled",
     initialValues: {
-      text: initial.text,
+      text: initialText,
       start: initial.start,
       end: initial.end,
     },
@@ -51,8 +56,11 @@ export default function EditCultureModal({
 
   // переинициализация при смене выбранной задачи
   useEffect(() => {
+    const initialText =
+      typeof initial.text === "number" ? String(initial.text) : initial.text;
+
     form.setValues({
-      text: initial.text,
+      text: initialText,
       start: initial.start,
       end: initial.end,
     });
@@ -97,7 +105,7 @@ export default function EditCultureModal({
           key={form.key("text")}
           {...form.getInputProps("text")}
           data={cultures.map((culture) => ({
-            value: String(culture.id),
+            value: String(culture.id), // убеждаемся, что value - строка
             label: culture.name,
           }))}
           mb="md"

@@ -18,6 +18,8 @@ import EditCultureModal from "./components/EditCultureModal";
 import CreateCultureModal from "./components/CreateCultureModal";
 import { useGetCultureLogs } from "../model/lib/hooks/useGetCultureLogs";
 import { useSetNewLog } from "../model/lib/hooks/useSetNewLog";
+import { useGetCulture } from "../model/lib/hooks/useGetCultures";
+import { useUpdateLog } from "../model/lib/hooks/useUpdateLog";
 
 const nextId = (list: GanttTask[]) =>
   list.length ? Math.max(...list.map((t) => t.id)) + 1 : 1;
@@ -33,7 +35,11 @@ export default function GanttDiagram({
   onCreateTask?: (payload: CreateTaskPayload) => Promise<{ id: number } | void>;
   onUpdateTask?: (payload: UpdateTaskPayload) => Promise<void>;
 }) {
+  const { cultures } = useGetCulture();
+
+  const cultureList = useMemo(() => cultures, [cultures]);
   const { newLog } = useSetNewLog();
+  const { updateLog } = useUpdateLog();
   const { cultureLogs } = useGetCultureLogs(data?.id);
   const [api, setApi] = useState<IApi | null>(null);
   const [tasks, setTasks] = useState<GanttTask[]>([]);
@@ -92,7 +98,12 @@ export default function GanttDiagram({
     setEditOpen(true);
   };
 
-  // ======== Создание (через форму модалки) ========
+  const getCultureIdByName = (cultureName: string): string => {
+    const culture = cultures.find((c) => c.name === cultureName);
+    return culture ? String(culture.id) : "";
+  };
+
+  // Создание
   const handleCreateSubmit = async (values: {
     text: string;
     start: Date;
@@ -153,37 +164,48 @@ export default function GanttDiagram({
     }
   };
 
-  // ======== Редактирование (через форму модалки) ========
+  // Редактирование
   const handleEditSubmit = async (values: {
-    text: string;
+    text: string; // ID культуры как строка
     start: Date;
     end: Date;
   }) => {
     if (!selectedTask) return;
     setUpdating(true);
 
-    const patch: UpdateTaskPayload = {
-      id: selectedTask.id,
-      text: values.text.trim(),
+    const selectedCulture = cultures.find((c) => String(c.id) === values.text);
+    const cultureName = selectedCulture ? selectedCulture.name : values.text;
+
+    const updatedTask: GanttTask = {
+      ...selectedTask,
+      text: getCultureIdByName(cultureName),
       start: values.start,
       end: values.end,
     };
 
     const snapshot = tasks;
-    setTasks((p) =>
-      p.map((t) =>
-        t.id === patch.id
-          ? { ...t, text: patch.text!, start: patch.start!, end: patch.end! }
-          : t
-      )
-    );
+
+    setTasks((p) => p.map((t) => (t.id === selectedTask.id ? updatedTask : t)));
 
     try {
-      if (onUpdateTask) await onUpdateTask(patch);
+      if (onUpdateTask) {
+        await onUpdateTask({
+          id: selectedTask.id,
+          text: cultureName,
+          start: values.start,
+          end: values.end,
+        });
+      } else {
+        await updateLog({
+          body: updatedTask,
+          id: selectedTask.id,
+        });
+      }
+
       setEditOpen(false);
     } catch (err) {
       console.error(err);
-      setTasks(snapshot); // откат
+      setTasks(snapshot);
       throw err;
     } finally {
       setUpdating(false);
@@ -272,10 +294,11 @@ export default function GanttDiagram({
         onClose={() => setEditOpen(false)}
         onSubmit={handleEditSubmit}
         initial={{
-          text: selectedTask?.text ?? "",
+          text: selectedTask ? getCultureIdByName(selectedTask.text) : "", // Преобразуем название в ID
           start: selectedTask?.start ?? null,
           end: selectedTask?.end ?? null,
         }}
+        cultures={cultureList}
       />
     </Box>
   );
