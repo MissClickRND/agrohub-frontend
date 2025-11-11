@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Flex, Stack, Text } from "@mantine/core";
+import { Autocomplete, Flex, Stack, Text } from "@mantine/core";
 import { useGetFields } from "../../Map/model/lib/hooks/useGetFields";
 import { useState } from "react";
 import { MapContainer, Polygon, Popup, TileLayer } from "react-leaflet";
@@ -10,7 +10,7 @@ const converCoords = (coords: [number, number][][]): [number, number][][] =>
   coords.map((ring) => ring.map(([lng, lat]) => [lat, lng]));
 
 export const FieldPreview = () => {
-  const { getFields } = useGetFields();
+  const { fields } = useGetFields();
   const [selectedField, setSelectedField] = useState<Field | null>(null);
   const [selectedZone, setSelectedZone] = useState<Zone | Field | null>(null);
   const [selectedCultures, setSelectedCultures] = useState<Record<
@@ -21,9 +21,9 @@ export const FieldPreview = () => {
     <Stack>
       <Text fz={"h4"}>Выберите поле</Text>
       <Autocomplete
-        data={getFields?.map((field) => field.name)}
+        data={fields?.map((field) => field.name)}
         onChange={(value) => {
-          const newField = getFields?.find((field) => field.name === value);
+          const newField = fields?.find((field) => field.name === value);
           console.log(newField, value);
           setSelectedField(newField ?? null);
           setSelectedZone(null);
@@ -130,7 +130,7 @@ export const FieldPreview = () => {
                             ? selectedField.area!
                             : selectedField.zones!.find(
                                 (zone) => zone.id === Number(key)
-                              )!.area
+                              )!.area!
                         ) / 10000}{" "}
                         Га
                       </Text>
