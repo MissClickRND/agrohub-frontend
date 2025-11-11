@@ -60,9 +60,9 @@ export default function FieldTemplate({
         <Text fz={12} c="var(--subtitle)" mt={4}>
           Площадь: {((data.area ?? 0) / 10000).toFixed(1)} га
         </Text>
-        <Text fz={12} c="var(--subtitle)">
+        {/* <Text fz={12} c="var(--subtitle)">
           Почва: {data.soil ?? "—"}
-        </Text>
+        </Text> */}
         <Text fz={12} c="var(--subtitle)">
           Зон: {data?.zones?.length ?? 0}
         </Text>

@@ -228,19 +228,31 @@ export default function GanttDiagram({
   };
 
   return (
-    <Box w={"83%"} pos="relative">
+    <Box style={{ width: "calc(100% - 280px)" }} pos="relative">
       <Locale words={ru}>
         <Willow>
           <Flex
-            className={styles.header}
-            px={14}
+            style={{
+              borderLeft: "2px solid var(--white-gray)",
+            }}
+            mah={78.5}
             align="center"
             justify="space-between"
-            w="100%"
+            p={16}
           >
-            <Text fw={500} fz={18} miw="50%">
-              Журнал роста культур: {data?.name}
-            </Text>
+            <Box>
+              <Text fw={500} fz={18}>
+                Журнал поля: {data?.name}
+              </Text>
+              <Text
+                fw={400}
+                c="var(--subtitle)"
+                fz={12}
+                style={{ textWrap: "nowrap" }}
+              >
+                Здесь вы видите записи по посадкам культур
+              </Text>
+            </Box>
 
             <div
               className={styles.toolbarRight}

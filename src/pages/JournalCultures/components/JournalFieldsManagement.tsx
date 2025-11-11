@@ -23,7 +23,7 @@ export default function JournalFieldsManagement({
   onFieldSelect: (id?: number) => void;
 }) {
   return (
-    <Box p={12} pb={0} w="17%">
+    <Box p={12} pb={0} miw="280px">
       <Text fw={500} fz={18} mb={8}>
         Поля
       </Text>
