@@ -1,0 +1,10 @@
+.MiniTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.MiniTable td {
+  border: 1px solid rgb(204, 204, 204);
+  border-bottom: 0;
+  border-top: 0;
+}

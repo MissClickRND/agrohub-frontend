@@ -1,6 +1,5 @@
-import { Button, Flex, Input, PasswordInput, Stack, Text } from "@mantine/core";
+import { Button, Input, PasswordInput, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { NavLink } from "react-router-dom";
 import { useLogin } from "../model/lib/hooks/useLogin";
 
 const LoginForm = () => {
@@ -46,17 +45,18 @@ const LoginForm = () => {
           fullWidth
           size="md"
           color="var(--main-color)"
+          mb={100}
         >
           Войти
         </Button>
-        <Flex gap={2} justify="center" align="center">
+        {/* <Flex gap={2} justify="center" align="center">
           <Text>Нет аккаунта? </Text>
           <NavLink to="/auth/register">
             <Text c="var(--main-color)" fw={600}>
               Зарегистрироваться
             </Text>
           </NavLink>
-        </Flex>
+        </Flex> */}
       </Stack>
     </form>
   );

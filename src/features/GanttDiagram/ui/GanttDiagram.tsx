@@ -48,9 +48,9 @@ export default function GanttDiagram({
   const { cultures } = useGetCulture();
 
   const cultureList = useMemo(() => cultures, [cultures]);
-  const { newLog } = useSetNewLog();
-  const { updateLog } = useUpdateLog();
-  const { cultureLogs } = useGetCultureLogs(data?.id);
+  const { newLog, isLoading: LoadingFir } = useSetNewLog();
+  const { updateLog, isLoading: LoadingSec } = useUpdateLog();
+  const { cultureLogs, isLoading: LoadingTh } = useGetCultureLogs(data?.id);
   const [api, setApi] = useState<IApi | null>(null);
   const [tasks, setTasks] = useState<GanttTask[]>([]);
   const [opened, { open, close }] = useDisclosure(false);
@@ -134,13 +134,11 @@ export default function GanttDiagram({
       // @ts-ignore
       parent: values.idParents,
     };
-    //suda
     setTasks((prev) => [...prev, optimistic]);
 
     try {
       let serverId: number | undefined;
       if (onCreateTask) {
-        // Если передан пропс, используем его (для обратной совместимости)
         const res = await onCreateTask({
           text: optimistic.text,
           start: optimistic.start!,
@@ -231,10 +229,6 @@ export default function GanttDiagram({
 
   return (
     <Box w={"83%"} pos="relative">
-      <LoadingOverlay visible={isLoading}>
-        <Loader />
-      </LoadingOverlay>
-
       <Locale words={ru}>
         <Willow>
           <Flex
@@ -279,26 +273,30 @@ export default function GanttDiagram({
               >
                 Редактировать
               </Button>
-              <ActionIcon color="red" onClick={open}>
+              <ActionIcon disabled={!selectedTask} color="red" onClick={open}>
                 <IconTrash />
               </ActionIcon>
             </div>
           </Flex>
 
           <div className={styles.ganttShell}>
-            <Gantt
-              columns={columns}
-              init={(a: IApi) => setApi(a)}
-              tasks={tasks}
-              scales={scales}
-              // редактирование — только через наши модалки
-              readonly
-            />
+            {LoadingFir || LoadingSec || LoadingTh ? (
+              <LoadingOverlay visible={LoadingFir || LoadingSec || LoadingTh}>
+                <Loader />
+              </LoadingOverlay>
+            ) : (
+              <Gantt
+                columns={columns}
+                init={(a: IApi) => setApi(a)}
+                tasks={tasks}
+                scales={scales}
+                readonly
+              />
+            )}
           </div>
         </Willow>
       </Locale>
 
-      {/* Модалки вынесены в отдельные компоненты */}
       <CreateCultureModal
         opened={createOpen}
         submitting={creating}
