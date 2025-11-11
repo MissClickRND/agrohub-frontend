@@ -1,14 +1,15 @@
 import { Button, Group, Modal, Select, Text } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import { TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetCulture } from "../../model/lib/hooks/useGetCultures";
+import { useGetZones } from "../../../Map/model/lib/hooks/useGetZones";
 
 type CreateValues = {
   text: string;
   start: Date | null;
   end: Date | null;
+  idParents: string;
 };
 
 export default function CreateCultureModal({
@@ -16,7 +17,9 @@ export default function CreateCultureModal({
   submitting,
   onClose,
   onSubmit,
+  idField,
 }: {
+  idField: number | undefined;
   opened: boolean;
   submitting: boolean;
   onClose: () => void;
@@ -24,17 +27,33 @@ export default function CreateCultureModal({
     text: string;
     start: Date;
     end: Date;
+    idParents: string;
   }) => Promise<void> | void;
 }) {
   const { cultures } = useGetCulture();
+  const { zones } = useGetZones(idField);
+  const [parents, setParents] = useState<{ value: string; label: string }[]>(
+    []
+  );
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (zones) {
+      const transformedParents = zones.map((zone: any) => ({
+        value: zone.id.toString(),
+        label: zone.name || `Зона ${zone.id}`,
+      }));
+      setParents(transformedParents);
+    }
+  }, [zones]);
 
   const form = useForm<CreateValues>({
     mode: "uncontrolled",
-    initialValues: { text: "", start: null, end: null },
+    initialValues: { text: "", idParents: "", start: null, end: null },
     validate: {
       text: (v) => (v.trim() ? null : "Укажите название задачи"),
       start: (v) => (v ? null : "Выберите дату начала"),
+      idParents: (v) => (v.trim() ? null : "Выберите зону"),
       end: (v, values) => {
         if (!v) return "Выберите дату окончания";
         if (values.start && v < values.start)
@@ -63,6 +82,7 @@ export default function CreateCultureModal({
               text: vals.text.trim(),
               start: vals.start!,
               end: vals.end!,
+              idParents: vals.idParents!,
             });
             form.reset();
           } catch (e) {
@@ -79,6 +99,15 @@ export default function CreateCultureModal({
             value: String(culture.id),
             label: culture.name,
           }))}
+          mb="md"
+          required
+        />
+
+        <Select
+          label="Зона"
+          placeholder="Выберите зону поля"
+          {...form.getInputProps("idParents")}
+          data={parents}
           mb="md"
           required
         />

@@ -26,3 +26,10 @@ export type Culture = {
   id: number;
   name: string;
 };
+
+export type ISetTask = {
+  text: string;
+  start?: Date;
+  end?: Date;
+  parent: string;
+};

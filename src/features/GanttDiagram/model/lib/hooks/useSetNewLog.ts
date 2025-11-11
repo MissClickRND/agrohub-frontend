@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
 import { newLog } from "../../api";
-import { GanttTask } from "../../types";
+import { ISetTask } from "../../types";
 
 export const useSetNewLog = () => {
   const { showError, showSuccess } = useNotifications();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (body: GanttTask) => newLog(body),
+    mutationFn: (body: ISetTask) => newLog(body),
     onSuccess: () => {
       showSuccess("Запись успешно создана");
       queryClient.invalidateQueries({ queryKey: ["logs"] });

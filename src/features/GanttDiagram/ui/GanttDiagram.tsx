@@ -17,6 +17,7 @@ import {
 import EditCultureModal from "./components/EditCultureModal";
 import CreateCultureModal from "./components/CreateCultureModal";
 import { useGetCultureLogs } from "../model/lib/hooks/useGetCultureLogs";
+import { useSetNewLog } from "../model/lib/hooks/useSetNewLog";
 
 const nextId = (list: GanttTask[]) =>
   list.length ? Math.max(...list.map((t) => t.id)) + 1 : 1;
@@ -26,21 +27,20 @@ export default function GanttDiagram({
   isLoading,
   onCreateTask,
   onUpdateTask,
-  defaultParentId = 47,
 }: {
   data: Field | undefined;
   isLoading: boolean;
   onCreateTask?: (payload: CreateTaskPayload) => Promise<{ id: number } | void>;
   onUpdateTask?: (payload: UpdateTaskPayload) => Promise<void>;
-  defaultParentId?: number;
 }) {
+  const { newLog } = useSetNewLog();
   const { cultureLogs } = useGetCultureLogs(data?.id);
   const [api, setApi] = useState<IApi | null>(null);
   const [tasks, setTasks] = useState<GanttTask[]>([]);
 
   useEffect(() => {
     setTasks(cultureLogs);
-  }, [data, cultureLogs]);
+  }, [data?.id, cultureLogs]);
 
   // выбранная задача (по клику в ганте)
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -97,6 +97,7 @@ export default function GanttDiagram({
     text: string;
     start: Date;
     end: Date;
+    idParents: string;
   }) => {
     setCreating(true);
 
@@ -107,14 +108,16 @@ export default function GanttDiagram({
       start: values.start,
       end: values.end,
       type: "task",
-      parent: defaultParentId,
+      // @ts-ignore
+      parent: values.idParents,
     };
-
+    //suda
     setTasks((prev) => [...prev, optimistic]);
 
     try {
       let serverId: number | undefined;
       if (onCreateTask) {
+        // Если передан пропс, используем его (для обратной совместимости)
         const res = await onCreateTask({
           text: optimistic.text,
           start: optimistic.start!,
@@ -123,13 +126,14 @@ export default function GanttDiagram({
         });
         if (res && typeof res.id === "number") serverId = res.id;
       } else {
-        serverId = tempId; // заглушка
-      }
-
-      if (serverId && serverId !== tempId) {
-        setTasks((prev) =>
-          prev.map((t) => (t.id === tempId ? { ...t, id: serverId! } : t))
-        );
+        const result = await newLog({
+          text: optimistic.text,
+          // @ts-ignore
+          start: `${optimistic.start}T13:57:48.049Z`,
+          // @ts-ignore
+          end: `${optimistic.end}T13:57:48.049Z`,
+          parent: String(optimistic.parent),
+        });
       }
 
       // выделить созданную задачу и проскроллить к ней
@@ -258,6 +262,7 @@ export default function GanttDiagram({
         submitting={creating}
         onClose={() => setCreateOpen(false)}
         onSubmit={handleCreateSubmit}
+        idField={data?.id}
       />
 
       <EditCultureModal
