@@ -42,3 +42,9 @@ export const updateLog = async ({
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка обновления записи");
 };
+
+export const deleteLog = async (id: number | null) => {
+  const res = await apiClient.delete(API + endpoints.DELETE_LOG(id));
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка удаления записи");
+};

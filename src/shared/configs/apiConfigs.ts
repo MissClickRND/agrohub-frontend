@@ -19,6 +19,6 @@ export const endpoints = {
   GET_LOGS: (id: number) => `/api/culture/${id}/list`,
   NEW_LOG: "/api/culture/create",
   UPDATE_LOG: (id: number) => `/api/culture/update/${id}`,
-  DELETE_LOG: (id: number) => `/api/culture/delete/${id}`,
+  DELETE_LOG: (id: number | null) => `/api/culture/delete/${id}`,
   CULTURES_LIST: "/api/culture/list",
 };

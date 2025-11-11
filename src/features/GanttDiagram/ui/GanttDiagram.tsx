@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Locale } from "@svar-ui/react-core";
-import { Box, Button, Flex, Loader, LoadingOverlay, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Flex,
+  Loader,
+  LoadingOverlay,
+  Text,
+} from "@mantine/core";
 import { Gantt, IApi, Willow } from "@svar-ui/react-gantt";
 import "@svar-ui/react-gantt/all.css";
 import "@mantine/dates/styles.css";
@@ -8,7 +16,7 @@ import styles from "./classes/GanttDiagram.module.css";
 import { ru } from "../model/Localization";
 import { Field } from "../../Map/model/types";
 import { columns, scales } from "../model/SettingsGantt";
-import { IconEdit, IconPlus } from "@tabler/icons-react";
+import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 import {
   CreateTaskPayload,
   GanttTask,
@@ -20,7 +28,9 @@ import { useGetCultureLogs } from "../model/lib/hooks/useGetCultureLogs";
 import { useSetNewLog } from "../model/lib/hooks/useSetNewLog";
 import { useGetCulture } from "../model/lib/hooks/useGetCultures";
 import { useUpdateLog } from "../model/lib/hooks/useUpdateLog";
-
+import { useDisclosure } from "@mantine/hooks";
+import ModalAcceptAction from "../../../widgets/ModalAcceptAction/ModalAcceptAction";
+import { useDeleteLog } from "../model/lib/hooks/useDeleteLog";
 const nextId = (list: GanttTask[]) =>
   list.length ? Math.max(...list.map((t) => t.id)) + 1 : 1;
 
@@ -43,12 +53,12 @@ export default function GanttDiagram({
   const { cultureLogs } = useGetCultureLogs(data?.id);
   const [api, setApi] = useState<IApi | null>(null);
   const [tasks, setTasks] = useState<GanttTask[]>([]);
+  const [opened, { open, close }] = useDisclosure(false);
 
   useEffect(() => {
     setTasks(cultureLogs);
   }, [data?.id, cultureLogs]);
 
-  // выбранная задача (по клику в ганте)
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const selectedTask = useMemo(
     () =>
@@ -57,6 +67,8 @@ export default function GanttDiagram({
         : null,
     [selectedId, tasks]
   );
+
+  const { deleteLog } = useDeleteLog();
 
   // модалки
   const [createOpen, setCreateOpen] = useState(false);
@@ -212,6 +224,11 @@ export default function GanttDiagram({
     }
   };
 
+  const handleDeleteTask = () => {
+    deleteLog(selectedId);
+    close();
+  };
+
   return (
     <Box w={"83%"} pos="relative">
       <LoadingOverlay visible={isLoading}>
@@ -250,7 +267,7 @@ export default function GanttDiagram({
               </Button>
               <Button
                 size="xs"
-                variant="light"
+                variant="filled"
                 onClick={openEdit}
                 disabled={!selectedTask}
                 title={
@@ -262,6 +279,9 @@ export default function GanttDiagram({
               >
                 Редактировать
               </Button>
+              <ActionIcon color="red" onClick={open}>
+                <IconTrash />
+              </ActionIcon>
             </div>
           </Flex>
 
@@ -299,6 +319,14 @@ export default function GanttDiagram({
           end: selectedTask?.end ?? null,
         }}
         cultures={cultureList}
+      />
+
+      <ModalAcceptAction
+        text={`Вы уверены что хотите удалить запись?`}
+        subtitle="Это действие нельзя будет отменить"
+        opened={opened}
+        onPass={handleDeleteTask}
+        close={close}
       />
     </Box>
   );
