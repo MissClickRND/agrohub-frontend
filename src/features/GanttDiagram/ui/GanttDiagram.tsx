@@ -7,10 +7,7 @@ import "@mantine/dates/styles.css";
 import styles from "./classes/GanttDiagram.module.css";
 import { ru } from "../model/Localization";
 import { Field } from "../../Map/model/types";
-import {
-  columns,
-  scales,
-} from "../model/SettingsGantt";
+import { columns, scales } from "../model/SettingsGantt";
 import { IconEdit, IconPlus } from "@tabler/icons-react";
 import {
   CreateTaskPayload,
@@ -19,27 +16,7 @@ import {
 } from "../model/types";
 import EditCultureModal from "./components/EditCultureModal";
 import CreateCultureModal from "./components/CreateCultureModal";
-
-// ========= Данные-заглушки =========
-const initialTasks: GanttTask[] = [
-  { id: 47, text: "Зона 1", type: "summary" },
-  {
-    id: 22,
-    text: "Task A",
-    start: new Date(2024, 7, 12),
-    end: new Date(2024, 12, 1),
-    parent: 47,
-    type: "task",
-  },
-  {
-    id: 24,
-    text: "Task B",
-    start: new Date(2024, 12, 1),
-    end: new Date(2025, 12, 1),
-    parent: 47,
-    type: "task",
-  },
-];
+import { useGetCultureLogs } from "../model/lib/hooks/useGetCultureLogs";
 
 const nextId = (list: GanttTask[]) =>
   list.length ? Math.max(...list.map((t) => t.id)) + 1 : 1;
@@ -57,10 +34,15 @@ export default function GanttDiagram({
   onUpdateTask?: (payload: UpdateTaskPayload) => Promise<void>;
   defaultParentId?: number;
 }) {
+  const { cultureLogs } = useGetCultureLogs(data?.id);
   const [api, setApi] = useState<IApi | null>(null);
-  const [tasks, setTasks] = useState<GanttTask[]>(initialTasks);
+  const [tasks, setTasks] = useState<GanttTask[]>([]);
 
-  // выбранная задача (по клику в гантте)
+  useEffect(() => {
+    setTasks(cultureLogs);
+  }, [data, cultureLogs]);
+
+  // выбранная задача (по клику в ганте)
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const selectedTask = useMemo(
     () =>

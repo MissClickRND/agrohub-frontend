@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
 import { getCultureLogs } from "../../api";
 
-export const useGetCultureLogs = (id: number) => {
+export const useGetCultureLogs = (id?: number) => {
   const { showError } = useNotifications();
 
   const query = useQuery({

@@ -9,7 +9,7 @@ export const getCulturesList = async (): Promise<Culture[]> => {
   return res.data;
 };
 
-export const getCultureLogs = async (id: number): Promise<Culture[]> => {
+export const getCultureLogs = async (id: number): Promise<GanttTask[]> => {
   const res = await apiClient.get(API + endpoints.GET_LOGS(id));
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка получения записей");
