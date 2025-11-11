@@ -1,6 +1,6 @@
 export type GeoPolygon = {
   type: "Polygon";
-  coordinates: number[][][];
+  coordinates: [number, number][][];
 };
 
 export type Zone = {
