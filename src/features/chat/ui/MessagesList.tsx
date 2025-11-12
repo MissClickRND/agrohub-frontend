@@ -1,11 +1,12 @@
-import { Box, Stack } from "@mantine/core";
-import { messagesMock } from "../../../../mocks/messagesMock";
+import { Stack } from "@mantine/core";
 import { Message } from "../../../entities/message/ui/Message";
+import { useChat } from "../model/lib/hooks/useChat";
 
 export const MessagesList = () => {
+  const { messages } = useChat()
   return (
     <Stack gap={"lg"}>
-      {messagesMock.map((message) => (
+      {messages.map((message) => (
         <Message key={"message-" + message.id} message={message} />
       ))}
     </Stack>
