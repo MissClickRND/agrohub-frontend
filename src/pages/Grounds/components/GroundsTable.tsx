@@ -18,7 +18,7 @@ import classes from "../classes/GroundTable.module.css";
 const fieldsData = [
   {
     id: 1,
-    name: "Поле 1",
+    name: "Зона 1",
     geoJSON: {
       type: "FeatureCollection",
       features: [
@@ -74,7 +74,7 @@ const fieldsData = [
   },
   {
     id: 2,
-    name: "Поле 2",
+    name: "Зона 2",
     geoJSON: {
       type: "FeatureCollection",
       features: [
@@ -120,7 +120,7 @@ const fieldsData = [
   },
   {
     id: 3,
-    name: "Поле 3",
+    name: "Зона 3",
     geoJSON: {
       type: "FeatureCollection",
       features: [
@@ -321,7 +321,7 @@ export default function GroundsTable({
       {
         accessorFn: (row: any) => row.measurements[0].date,
         id: "lastMeasurement",
-        header: "Замер",
+        header: "Дата замера",
         Cell: ({ cell }: any) => {
           const lastDate = dayjs(cell.getValue());
           const daysAgo = dayjs().diff(lastDate, "day");

@@ -1,6 +1,5 @@
-﻿import { IconMap } from "@tabler/icons-react";
-import GroundsTable from "./components/GroundsTable.tsx";
-import { Box, Button, Flex, Stack, Text } from "@mantine/core";
+﻿import GroundsTable from "./components/GroundsTable.tsx";
+import { Flex, Stack } from "@mantine/core";
 import CreateMapPointModal from "./components/CreateMapPointModal.tsx";
 import { useDisclosure } from "@mantine/hooks";
 import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields.ts";

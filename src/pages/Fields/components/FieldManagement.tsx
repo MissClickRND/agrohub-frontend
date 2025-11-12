@@ -28,9 +28,12 @@ export default function FieldManagement({
 }) {
   return (
     <Box p={12} pb={0} w={280}>
+      <Text fw={600} mb={8}>
+        Поля
+      </Text>
       <Button
         fullWidth
-        mb={12}
+        mb={8}
         onClick={onToggleFieldDrawing}
         color={isFieldDrawing ? "red" : "primary.7"}
         radius={8}
@@ -38,10 +41,6 @@ export default function FieldManagement({
         {isFieldDrawing ? <IconX /> : <IconPlus />}
         {isFieldDrawing ? "Отменить" : "Создать поле"}
       </Button>
-
-      <Text fw={600} mb={8}>
-        Поля
-      </Text>
       <ScrollArea scrollbarSize={6} h="85vh">
         <Stack gap={8} pos="relative">
           {isLoading && (
