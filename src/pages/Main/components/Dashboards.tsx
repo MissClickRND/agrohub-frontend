@@ -221,11 +221,7 @@ const Dashboards = () => {
                             {crop.name}
                           </Text>
                         </Group>
-                        <Text
-                          size="sm"
-                          fw={600}
-                          style={{ color: "var(--main-color)" }}
-                        >
+                        <Text size="sm" fw={600}>
                           {(
                             (crop.value /
                               mockData.crops.reduce(
@@ -256,7 +252,7 @@ const Dashboards = () => {
                                 )) *
                               100
                             ).toFixed(0)}%`,
-                            backgroundColor: `var(--main-color)`,
+                            backgroundColor: crop.color,
                             opacity: 0.8 - index * 0.12,
                             borderRadius: 3,
                           }}
