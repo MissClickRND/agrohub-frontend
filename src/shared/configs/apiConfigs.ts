@@ -25,6 +25,8 @@ export const endpoints = {
   // данные о почве
   NEW_DATA: "/api/ground/create",
   GET_DATA: (id: number) => `/api/ground/${id}/list`,
+  DELETE_DATA: (id: number | null) => `/api/ground/${id}/delete`,
+
   SEND_MESSAGE: "/api/chat/completion",
-  SEND_MESSAGE_STREAM: "/api/chat/completion-stream"
+  SEND_MESSAGE_STREAM: "/api/chat/completion-stream",
 };

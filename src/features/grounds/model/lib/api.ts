@@ -31,3 +31,9 @@ export const getGroundData = async (
     throw new Error("Ошибка получения данных почвы");
   return res.data;
 };
+
+export const deleteGroundData = async (id: number | null) => {
+  const res = await apiClient.delete(API + endpoints.DELETE_DATA(id));
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка удаления записи");
+};

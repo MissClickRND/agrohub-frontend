@@ -1,6 +1,6 @@
 ﻿// GroundsTable.tsx
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Group, Text } from "@mantine/core";
+import { ActionIcon, Badge, Flex, Group, Text } from "@mantine/core";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import dayjs from "dayjs";
 import {
@@ -11,15 +11,18 @@ import {
   IconLeaf,
   IconLeaf2,
   IconMinus,
+  IconTrash,
   IconWaterpolo,
 } from "@tabler/icons-react";
 import classes from "../classes/GroundTable.module.css";
 import { useGetGroundData } from "../../../features/grounds/model/lib/hooks/useGetGroundData";
+import ModalAcceptAction from "../../../widgets/ModalAcceptAction/ModalAcceptAction";
+import { useDisclosure } from "@mantine/hooks";
+import { useDeleteGroundData } from "../../../features/grounds/model/lib/hooks/useDeleteGroundData";
 
-// ---------- Типы твоей модели ----------
 export type GeoPolygon =
-  | { type: "Polygon"; coordinates: number[][][] } // [[[lng,lat], ...]]
-  | { type: "MultiPolygon"; coordinates: number[][][][] }; // [[[[lng,lat], ...]], ...]
+  | { type: "Polygon"; coordinates: number[][][] }
+  | { type: "MultiPolygon"; coordinates: number[][][][] };
 export type Zone = {
   id?: number;
   name: string;
@@ -87,6 +90,7 @@ type ZoneRow = {
     rainfall?: number;
   };
   allMeasurements: Array<{
+    id: number; // ← добавили
     date: string;
     N: number;
     P: number;
@@ -316,6 +320,7 @@ const normalizeRows = (
     const prev = grounds[1];
 
     const allMeasurements = grounds.map((g) => ({
+      id: g.id,
       date: g.createdAt,
       N: g.N,
       P: g.P,
@@ -379,8 +384,12 @@ export default function GroundsTable({
   fields: Field[];
   fieldId: number | undefined;
 }) {
+  const { deleteGroundData } = useDeleteGroundData();
   const { groundData, isLoading } = useGetGroundData(fieldId);
   const [rows, setRows] = useState<ZoneRow[]>([]);
+
+  const [toDeleteId, setToDeleteId] = useState<number | null>(null);
+  const [opened, { open, close }] = useDisclosure(false);
 
   const selectedField = useMemo(
     () => fields?.find((f) => f.id === fieldId),
@@ -390,6 +399,14 @@ export default function GroundsTable({
   useEffect(() => {
     setRows(normalizeRows(selectedField, groundData as BackendField | null));
   }, [selectedField, groundData]);
+
+  const handleDelete = async () => {
+    if (toDeleteId == null) return;
+    await deleteGroundData(toDeleteId); // предполагаем сигнатуру deleteGroundData(id: number)
+    // await refetch(); // если нужно подтянуть обновления после удаления
+    setToDeleteId(null);
+    close();
+  };
 
   const columns = useMemo<MRT_ColumnDef<ZoneRow>[]>(
     () => [
@@ -613,6 +630,7 @@ export default function GroundsTable({
                     "Осадки",
                     "Координаты",
                     "Рекомендация",
+                    "",
                   ].map((h) => (
                     <th
                       key={h}
@@ -666,8 +684,30 @@ export default function GroundsTable({
                             )}`
                           : "—"}
                       </td>
-                      <td style={{ padding: 6 }}>
+                      <td style={{ padding: 6, justifyContent: "center" }}>
                         {getRecommendationBadges(m)}
+                      </td>
+                      <td style={{ padding: 6 }}>
+                        <Flex justify="center">
+                          <ActionIcon
+                            color="red"
+                            onClick={() => {
+                              setToDeleteId(m.id);
+                              open();
+                            }}
+                          >
+                            <IconTrash />
+                          </ActionIcon>
+                        </Flex>
+                        <ModalAcceptAction
+                          text="Вы точно хотите удалить данные о почве?"
+                          close={() => {
+                            setToDeleteId(null);
+                            close();
+                          }}
+                          opened={opened}
+                          onPass={handleDelete}
+                        />
                       </td>
                     </tr>
                   ))
