@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
-import { newGroundData } from "./api";
+
 import { GroundData } from "../types";
+import { newGroundData } from "../api";
 
 export const useSetNewGroundData = () => {
   const { showError, showSuccess } = useNotifications();

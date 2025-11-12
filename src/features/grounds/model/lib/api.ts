@@ -1,6 +1,6 @@
-import apiClient from "../../../../../app/api/axiosInstance";
-import { API, endpoints } from "../../../../../shared/configs/apiConfigs";
-import { GroundData } from "../types";
+import apiClient from "../../../../app/api/axiosInstance";
+import { API, endpoints } from "../../../../shared/configs/apiConfigs";
+import { GroundData } from "./types";
 
 export const newGroundData = async (body: GroundData) => {
   const res = await apiClient.put(API + endpoints.NEW_LOG, {
@@ -15,7 +15,9 @@ export const newGroundData = async (body: GroundData) => {
       type: "Point",
       coordinates: body.coordinates,
     },
-    createdAt: `${body.date}T13:35:24.656Z`,
+    createdAt: body?.date?.toString().includes("Z")
+      ? body?.date
+      : `${body.date}T13:35:24.656Z`,
   });
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка создания данных почвы");

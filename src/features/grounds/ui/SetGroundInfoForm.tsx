@@ -20,7 +20,7 @@ export default function SetGroundInfoForm({
       RainFall: null,
       pH: null,
       coordinates: coordinates,
-      date: new Date(),
+      date: new Date().toISOString(),
     },
     validate: {
       N: (value) => (value ? null : "Поле обязательно для заполнения"),
