@@ -96,7 +96,7 @@ export const FieldPreview = () => {
                       if (cultures.includes(value) || value === "")
                         setSelectedCultures({
                           ...selectedCultures,
-                          [zone.id]: value,
+                          [zone.id!]: value,
                         });
                     }}
                     data={cultures}

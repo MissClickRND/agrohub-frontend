@@ -5,11 +5,13 @@ import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react'
 import { useState } from 'react'
 import { chatListVar } from '../model/animations'
 import { useGetFields } from '../../../../Map/model/lib/hooks/useGetFields'
+import { useChat } from '../../../model/lib/hooks/useChat'
 
 export const ChatsList = () => {
   const theme = useMantineTheme()
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const {getFields} = useGetFields()
+  const {fields} = useGetFields()
+  const {handleChangeField, currentFieldId} = useChat()
   return (
     <Paper component={motion.div} variants={chatListVar} initial="hide" animate={isOpen? "show" : "hide"} withBorder style={{position: "absolute", left: 0, top: 0}} h={"100%"} w={"20rem"}>
       <Stack align='center' mah={"40%"} pt={"2rem"} gap={0}>
@@ -24,8 +26,8 @@ export const ChatsList = () => {
       </Stack>
       <Stack align="center" mah={"40%"} pt={"2rem"} gap={0}>
         <Text style={{alignSelf: "start"}} ml={"1rem"} c={'neutral.4'}>Поля:</Text>
-        {getFields && getFields.map((field) => (
-          <Paper whileHover={{backgroundColor: theme.colors.neutral[1]}} component={motion.div} p={".5rem 1rem"} w="90%" bg={'transparent'}>
+        {fields && fields.map((field) => (
+          <Paper onClick={() => handleChangeField(Number(field.id))} whileHover={{backgroundColor: theme.colors.neutral[1]}} component={motion.div} p={".5rem 1rem"} w="90%" bg={currentFieldId === Number(field.id) ? "primary.2" : 'transparent'}>
             <Text>
               {field.name}
             </Text>

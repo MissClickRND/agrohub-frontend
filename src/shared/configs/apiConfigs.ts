@@ -17,4 +17,7 @@ export const endpoints = {
   NEW_LOG: "/api/culture/create",
   UPDATE_LOG: (id: number) => `/api/culture/update/${id}`,
   CULTURES_LIST: "/api/culture/list",
+
+  SEND_MESSAGE: "/api/chat/completion",
+  SEND_MESSAGE_STREAM: "/api/chat/completion-stream"
 };
