@@ -8,3 +8,37 @@
   border-bottom: 0;
   border-top: 0;
 }
+
+/* GroundTable.module.css */
+
+/* head cells: сам <th> и его flex-контент */
+:global(.mrt-table-head-cell) {
+  text-align: center;
+}
+:global(.mrt-table-head-cell-content) {
+  justify-content: center; /* центрирует заголовок колонки */
+}
+
+/* body cells: сам <td> и его flex-контент */
+:global(.mrt-table-body-cell) {
+  text-align: center;
+}
+:global(.mrt-table-body-cell-content) {
+  justify-content: center; /* центрирует содержимое ячейки */
+}
+
+/* ячейки expand/selection тоже по центру (если используете) */
+:global(.mrt-expand-cell),
+:global(.mrt-expand-button),
+:global(.mrt-row-expand-toggle-button) {
+  justify-content: center;
+  align-items: center;
+}
+
+/* футер на всякий случай */
+:global(.mrt-table-footer-cell) {
+  text-align: center;
+}
+:global(.mrt-table-footer-cell-content) {
+  justify-content: center;
+}

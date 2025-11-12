@@ -1,11 +1,13 @@
-﻿import GroundsTable from "./components/GroundsTable.tsx";
+﻿// pages/Grounds/GroundsPage.tsx
 import { Flex, Stack } from "@mantine/core";
-import CreateMapPointModal from "./components/CreateMapPointModal.tsx";
 import { useDisclosure } from "@mantine/hooks";
-import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields.ts";
 import { useEffect, useState } from "react";
-import SelectFieldsManager from "../../widgets/SelectFieldsManagement/SelectFieldsManager.tsx";
-import GroundHeader from "./components/GroundHeader.tsx";
+
+import GroundsTable from "./components/GroundsTable";
+import CreateMapPointModal from "./components/CreateMapPointModal";
+import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields";
+import SelectFieldsManager from "../../widgets/SelectFieldsManagement/SelectFieldsManager";
+import GroundHeader from "./components/GroundHeader";
 
 const GroundsPage = () => {
   const { fields, isLoading } = useGetFields();
@@ -13,7 +15,7 @@ const GroundsPage = () => {
   const [opened, { open, close }] = useDisclosure(false);
 
   useEffect(() => {
-    setSelectedFieldId(fields[0]?.id);
+    setSelectedFieldId(fields?.[0]?.id);
   }, [fields]);
 
   return (
@@ -26,9 +28,14 @@ const GroundsPage = () => {
           selectedFieldId={selectedFieldId}
           onFieldSelect={setSelectedFieldId}
         />
+
         <Stack gap={0} style={{ width: "calc(100% - 280px)" }}>
           <GroundHeader open={open} />
-          <GroundsTable fieldId={selectedFieldId} />
+
+          <GroundsTable
+            key={selectedFieldId ?? "no-field"}
+            fieldId={selectedFieldId}
+          />
         </Stack>
       </Flex>
     </>
