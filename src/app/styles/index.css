@@ -9,8 +9,9 @@ body {
 }
 
 :root {
-  --main-color: #43c03d;
-  --white-gray: #e5e7eb;
+  /* --main-color: #43c03d; */
+  --main-color: #3aaa35;
+  --white-gray: #d7d9dd;
   --navbar-button-color: #f3f5f7;
   --subtitle: #878787;
 }

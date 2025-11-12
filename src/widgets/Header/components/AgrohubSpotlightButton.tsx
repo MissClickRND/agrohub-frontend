@@ -15,9 +15,9 @@ function AgrohubSpotlightButton({ onClick }: Props) {
       style={{ cursor: "text", borderColor: "var(--white-gray)" }}
       variant={"outline"}
       justify={"start"}
-      leftSection={<IconSearch color={theme.colors.primary[4]} />}
+      leftSection={<IconSearch color={theme.colors.primary[7]} />}
     >
-      <Text c={"black"} fw={"500"} fz={14}>
+      <Text c={"gray"} fw={"500"} fz={14}>
         Навигация...
       </Text>
     </Button>

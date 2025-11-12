@@ -28,10 +28,10 @@ export default function NavbarNested({ expanded }: Props) {
                   to={item.link ?? "#"}
                   size="lg"
                   radius="md"
-                  variant={active ? "filled" : "light"}
+                  variant={active ? "filled" : "transparent"}
                   className={classes.railIcon}
                   aria-label={item.label}
-                  color="var(--main-color)"
+                  color={active ? "var(--main-color)" : "black"}
                 >
                   {item.icon}
                 </ActionIcon>

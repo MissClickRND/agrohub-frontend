@@ -46,6 +46,10 @@ function Header({ burgerOpened, burgerToggle }: Props) {
                 onClick={burgerToggle}
                 hiddenFrom="sm"
               />
+              <Group gap={6} px={4}>
+                <img src="/icons/Logo.svg" style={{ width: "35px" }} />
+                <Text fw={600}>АгроХаб</Text>
+              </Group>
               <Box visibleFrom={"sm"}>
                 <AgrohubSpotlightButton onClick={spotlight.open} />
               </Box>

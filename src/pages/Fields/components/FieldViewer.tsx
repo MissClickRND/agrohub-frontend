@@ -63,7 +63,7 @@ const FieldViewer = forwardRef<
                 </Text>
               </Box>
               <Button
-                color={isZoneDrawing ? "red" : "primary.4"}
+                color={isZoneDrawing ? "red" : "primary.7"}
                 radius="8px"
                 onClick={onToggleZoneDrawing}
               >

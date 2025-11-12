@@ -32,7 +32,7 @@ export default function FieldManagement({
         fullWidth
         mb={12}
         onClick={onToggleFieldDrawing}
-        color={isFieldDrawing ? "red" : "primary.4"}
+        color={isFieldDrawing ? "red" : "primary.7"}
         radius={8}
       >
         {isFieldDrawing ? <IconX /> : <IconPlus />}

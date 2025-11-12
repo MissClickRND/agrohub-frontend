@@ -21,7 +21,7 @@ const GroundsPage = () => {
           </Text>
         </Box>
 
-        <Button>
+        <Button color="var(--main-color)">
           <IconMap />
           Внести данные
         </Button>

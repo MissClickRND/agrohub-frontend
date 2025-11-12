@@ -1,12 +1,14 @@
-import { Box, Text } from "@mantine/core";
-import { IconHome } from "@tabler/icons-react";
+import { Box } from "@mantine/core";
+import Dashboards from "./components/Dashboards";
+import DashboardHeader from "./components/DashboardHeader";
 
 export default function Main() {
   return (
-    <Box w="100%" bg="blue">
-      <Text py={50} ta="center" fz={28} c="white">
-        <IconHome />
-      </Text>
-    </Box>
+    <>
+      <DashboardHeader />
+      <Box w="100%" p={16}>
+        <Dashboards />
+      </Box>
+    </>
   );
 }
