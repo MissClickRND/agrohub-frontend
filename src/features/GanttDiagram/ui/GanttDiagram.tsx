@@ -421,15 +421,7 @@ export default function GanttDiagram({
     <Box style={{ width: "calc(100% - 280px)" }} pos="relative">
       <Locale words={ru}>
         <Willow>
-          <Flex
-            style={{
-              borderLeft: "2px solid var(--white-gray)",
-            }}
-            mah={78.5}
-            align="center"
-            justify="space-between"
-            p={16}
-          >
+          <Flex mah={78.5} align="center" justify="space-between" p={16}>
             <Box>
               <Text fw={500} fz={18}>
                 Журнал поля: {data?.name}

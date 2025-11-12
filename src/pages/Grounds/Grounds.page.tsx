@@ -3,36 +3,35 @@ import GroundsTable from "./components/GroundsTable.tsx";
 import { Box, Button, Flex, Stack, Text } from "@mantine/core";
 import CreateMapPointModal from "./components/CreateMapPointModal.tsx";
 import { useDisclosure } from "@mantine/hooks";
+import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields.ts";
+import { useEffect, useState } from "react";
+import SelectFieldsManager from "../../widgets/SelectFieldsManagement/SelectFieldsManager.tsx";
+import GroundHeader from "./components/GroundHeader.tsx";
 
 const GroundsPage = () => {
+  const { fields, isLoading } = useGetFields();
+  const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>();
   const [opened, { open, close }] = useDisclosure(false);
+
+  useEffect(() => {
+    setSelectedFieldId(fields[0]?.id);
+  }, [fields]);
+
   return (
     <>
       <CreateMapPointModal opened={opened} onClose={close} />
-      <Stack>
-        <Flex
-          style={{ borderBottom: "1px solid var(--white-gray)" }}
-          mah={78.5}
-          align="center"
-          justify="space-between"
-          p={16}
-        >
-          <Box>
-            <Text fw={500} fz={18}>
-              Состав почв
-            </Text>
-            <Text fw={400} c="var(--subtitle)" fz={12}>
-              Здесь вы видете последние изменения почв
-            </Text>
-          </Box>
-
-          <Button color="var(--main-color)" onClick={open}>
-            <IconMap />
-            Внести данные
-          </Button>
-        </Flex>
-        <GroundsTable />
-      </Stack>
+      <Flex h="100%">
+        <SelectFieldsManager
+          isLoading={isLoading}
+          data={fields}
+          selectedFieldId={selectedFieldId}
+          onFieldSelect={setSelectedFieldId}
+        />
+        <Stack gap={0} style={{ width: "calc(100% - 280px)" }}>
+          <GroundHeader open={open} />
+          <GroundsTable fieldId={selectedFieldId} />
+        </Stack>
+      </Flex>
     </>
   );
 };

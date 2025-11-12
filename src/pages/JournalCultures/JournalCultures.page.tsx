@@ -1,8 +1,9 @@
 import { Flex } from "@mantine/core";
 import GanttDiagram from "../../features/GanttDiagram/ui/GanttDiagram";
-import JournalFieldsManagement from "./components/JournalFieldsManagement";
+
 import { useEffect, useState } from "react";
 import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields";
+import SelectFieldsManager from "../../widgets/SelectFieldsManagement/SelectFieldsManager";
 
 export default function JournalCultures() {
   const { fields, isLoading } = useGetFields();
@@ -14,7 +15,7 @@ export default function JournalCultures() {
 
   return (
     <Flex h="100%">
-      <JournalFieldsManagement
+      <SelectFieldsManager
         isLoading={isLoading}
         data={fields}
         selectedFieldId={selectedFieldId}

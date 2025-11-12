@@ -6,7 +6,9 @@ import { useSetNewGroundData } from "../model/lib/hooks/useSetNewGroundData";
 
 export default function SetGroundInfoForm({
   coordinates,
+  close,
 }: {
+  close: () => void;
   coordinates: number[] | null;
 }) {
   const { newGroundData } = useSetNewGroundData();
@@ -43,6 +45,7 @@ export default function SetGroundInfoForm({
   const handleSubmit = () => {
     newGroundData(form.values);
     close();
+    form.reset();
   };
 
   return (

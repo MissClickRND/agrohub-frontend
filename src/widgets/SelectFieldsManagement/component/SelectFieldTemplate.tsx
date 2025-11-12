@@ -1,11 +1,11 @@
 import { Text, Flex, ActionIcon, UnstyledButton } from "@mantine/core";
 import { Field } from "../../../features/Map/model/types";
 import { IconTrash } from "@tabler/icons-react";
-import ModalAcceptAction from "../../../widgets/ModalAcceptAction/ModalAcceptAction";
+import ModalAcceptAction from "../../ModalAcceptAction/ModalAcceptAction";
 import { useDisclosure } from "@mantine/hooks";
 import { useDeleteField } from "../../../features/Map/model/lib/hooks/useDeleteField";
 
-export default function JournalFieldTemplate({
+export default function SelectFieldTemplate({
   data,
   isSelected,
   onSelect,

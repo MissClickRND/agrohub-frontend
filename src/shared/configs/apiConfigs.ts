@@ -21,4 +21,8 @@ export const endpoints = {
   UPDATE_LOG: (id: number) => `/api/culture/update/${id}`,
   DELETE_LOG: (id: number | null) => `/api/culture/delete/${id}`,
   CULTURES_LIST: "/api/culture/list",
+
+  // данные о почве
+  NEW_DATA: "/api/ground/create",
+  GET_DATA: (id: number) => `/api/ground/${id}/list`,
 };

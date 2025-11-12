@@ -6,8 +6,8 @@
 }
 
 .ganttShell {
-  height: 85.8vh;
-  border: 2px solid #e6e6e6;
+  height: 86.3vh;
+  border-top: 2px solid #e6e6e6;
   border-radius: 0 0 8px 8px;
   overflow: hidden;
 }

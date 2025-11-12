@@ -176,7 +176,8 @@ const fieldsData = [
   },
 ];
 
-const getRecommendationBadges = (m) => {
+// хелперы
+const getRecommendationBadges = (m: any) => {
   const badges = [];
   if (m.ph < 6.0)
     badges.push(
@@ -233,7 +234,7 @@ const getRecommendationBadges = (m) => {
   );
 };
 
-const getTrendIcon = (current, previous) => {
+const getTrendIcon = (current: number, previous?: number) => {
   if (previous === undefined) return null;
   if (current > previous)
     return <IconArrowUp size={14} color="green" style={{ marginLeft: 4 }} />;
@@ -242,75 +243,86 @@ const getTrendIcon = (current, previous) => {
   return <IconMinus size={14} color="gray" style={{ marginLeft: 4 }} />;
 };
 
-export default function GroundsTable() {
-  const [expanded, setExpanded] = useState({});
+// Компонент
+export default function GroundsTable({
+  fieldId,
+}: {
+  fieldId: number | undefined;
+}) {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const columns = useMemo(
     () => [
       {
-        accessorFn: (row) => row.geoJSON,
+        accessorFn: (row: any) => row.geoJSON,
         id: "miniField",
-        header: "Миниатюра поля",
-        Cell: ({ cell }) => {
+        header: "Миниатюра",
+        Cell: ({ cell }: any) => {
           const geoJSON = cell.getValue();
           if (!geoJSON) return null;
 
           const coords = geoJSON.features[0].geometry.coordinates[0];
-          const lats = coords.map((c) => c[1]);
-          const lngs = coords.map((c) => c[0]);
+          const lats = coords.map((c: number[]) => c[1]);
+          const lngs = coords.map((c: number[]) => c[0]);
           const minLat = Math.min(...lats);
           const maxLat = Math.max(...lats);
           const minLng = Math.min(...lngs);
           const maxLng = Math.max(...lngs);
 
-          const width = 200; // увеличили ширину
-          const height = 150; // увеличили высоту
-          const padding = 10; // отступы для красоты
+          const width = 180;
+          const height = 120;
+          const padding = 8;
 
           const scaleX = (width - 2 * padding) / (maxLng - minLng || 1);
           const scaleY = (height - 2 * padding) / (maxLat - minLat || 1);
           const scale = Math.min(scaleX, scaleY);
 
-          const transformX = (lng) => padding + (lng - minLng) * scale;
-          const transformY = (lat) => height - padding - (lat - minLat) * scale;
+          const tx = (lng: number) => padding + (lng - minLng) * scale;
+          const ty = (lat: number) => height - padding - (lat - minLat) * scale;
 
           return (
-            <svg
-              width={width}
-              height={height}
-              style={{ border: "1px solid #ccc", borderRadius: 4 }}
-            >
-              <polygon
-                points={coords
-                  .map((c) => `${transformX(c[0])},${transformY(c[1])}`)
-                  .join(" ")}
-                fill="rgba(0, 200, 0, 0.1)"
-                stroke="green"
-                strokeWidth={2}
-              />
-              {coords.map((c, idx) => (
-                <circle
-                  key={idx}
-                  cx={transformX(c[0])}
-                  cy={transformY(c[1])}
-                  r={3} // чуть больше точки
-                  fill="red"
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <svg
+                width={width}
+                height={height}
+                style={{ border: "1px solid #e0e0e0", borderRadius: 4 }}
+              >
+                <polygon
+                  points={coords
+                    .map((c: number[]) => `${tx(c[0])},${ty(c[1])}`)
+                    .join(" ")}
+                  fill="rgba(0, 200, 0, 0.1)"
+                  stroke="green"
+                  strokeWidth={2}
                 />
-              ))}
-            </svg>
+                {coords.map((c: number[], idx: number) => (
+                  <circle
+                    key={idx}
+                    cx={tx(c[0])}
+                    cy={ty(c[1])}
+                    r={3}
+                    fill="red"
+                  />
+                ))}
+              </svg>
+            </div>
           );
         },
       },
       {
         accessorKey: "name",
-        header: "Поле",
-        Cell: ({ cell }) => <Text weight={500}>{cell.getValue()}</Text>,
+        header: "Зона",
+        Cell: ({ cell }: any) => (
+          <Text fw={600} ta="center">
+            {cell.getValue()}
+          </Text>
+        ),
       },
       {
-        accessorFn: (row) => row.measurements[0].date,
+        accessorFn: (row: any) => row.measurements[0].date,
         id: "lastMeasurement",
-        header: "Последнее измерение",
-        Cell: ({ cell }) => {
+        header: "Замер",
+        Cell: ({ cell }: any) => {
           const lastDate = dayjs(cell.getValue());
           const daysAgo = dayjs().diff(lastDate, "day");
           const isOld = daysAgo > 30;
@@ -322,14 +334,22 @@ export default function GroundsTable() {
         },
       },
       {
-        accessorFn: (row) => row.measurements[0],
+        accessorFn: (row: any) => row.measurements[0],
         id: "NPK",
-        header: "N / P / K (мг/кг)",
-        Cell: ({ cell, row }) => {
-          const m = cell.getValue(); // текущее измерение
-          const prev = row.original.measurements[1]; // предыдущее измерение
+        header: "N/P/K",
+        Cell: ({ cell, row }: any) => {
+          const m = cell.getValue();
+          const prev = row.original.measurements[1];
           return (
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                alignItems: "center",
+                textAlign: "center",
+              }}
+            >
               <span>
                 N: {m.N} мг/кг {getTrendIcon(m.N, prev?.N)}
               </span>
@@ -344,38 +364,38 @@ export default function GroundsTable() {
         },
       },
       {
-        accessorFn: (row) => row.measurements[0].temperature,
+        accessorFn: (row: any) => row.measurements[0].temperature,
         id: "temperature",
-        header: "Температура (°C)",
-        Cell: ({ cell, row }) => {
+        header: "C°",
+        Cell: ({ cell, row }: any) => {
           const current = cell.getValue();
           const previous = row.original.measurements[1]?.temperature;
           return (
             <span>
-              {current} °C {getTrendIcon(current, previous)}
+              {current}° {getTrendIcon(current, previous)}
             </span>
           );
         },
       },
       {
-        accessorFn: (row) => row.measurements[0].humidity,
+        accessorFn: (row: any) => row.measurements[0].humidity,
         id: "humidity",
-        header: "Влажность (%)",
-        Cell: ({ cell, row }) => {
+        header: "Влажность",
+        Cell: ({ cell, row }: any) => {
           const current = cell.getValue();
           const previous = row.original.measurements[1]?.humidity;
           return (
             <span>
-              {current} % {getTrendIcon(current, previous)}
+              {current}% {getTrendIcon(current, previous)}
             </span>
           );
         },
       },
       {
-        accessorFn: (row) => row.measurements[0].ph,
+        accessorFn: (row: any) => row.measurements[0].ph,
         id: "ph",
         header: "pH",
-        Cell: ({ cell, row }) => {
+        Cell: ({ cell, row }: any) => {
           const current = cell.getValue();
           const previous = row.original.measurements[1]?.ph;
           return (
@@ -386,10 +406,10 @@ export default function GroundsTable() {
         },
       },
       {
-        accessorFn: (row) => row.measurements[0].rainfall,
+        accessorFn: (row: any) => row.measurements[0].rainfall,
         id: "rainfall",
-        header: "Осадки (мм)",
-        Cell: ({ cell, row }) => {
+        header: "Осадки",
+        Cell: ({ cell, row }: any) => {
           const current = cell.getValue();
           const previous = row.original.measurements[1]?.rainfall;
           return (
@@ -400,10 +420,10 @@ export default function GroundsTable() {
         },
       },
       {
-        accessorFn: (row) => row.measurements[0],
+        accessorFn: (row: any) => row.measurements[0],
         id: "recommendation",
-        header: "Рекомендации",
-        Cell: ({ cell }) => getRecommendationBadges(cell.getValue()),
+        header: "Реком.",
+        Cell: ({ cell }: any) => getRecommendationBadges(cell.getValue()),
       },
     ],
     []
@@ -412,93 +432,106 @@ export default function GroundsTable() {
   return (
     <MantineReactTable
       columns={columns}
+      data={fieldsData}
+      // центрирование шапки и ячеек, компактная шапка
+      mantineTableHeadCellProps={{
+        style: {
+          padding: "5px",
+          height: 32,
+          textAlign: "center",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+        },
+      }}
+      mantineTableBodyCellProps={{
+        style: {
+          padding: "5px 0 5px 0",
+          textAlign: "center",
+          verticalAlign: "middle",
+        },
+      }}
+      // без пагинации и нижнего/верхнего тулбара
+      enablePagination={false}
+      enableBottomToolbar={false}
+      enableTopToolbar={false}
+      // высота до низа экрана
+      mantineTableContainerProps={{
+        style: {
+          height: "calc(100vh - 140px)", // при необходимости подстройте отступ под ваш layout
+          overflow: "auto",
+        },
+      }}
       mantinePaperProps={{
         withBorder: false,
+        style: { height: "100%" },
       }}
-      data={fieldsData}
+      mantineTableProps={{
+        highlightOnHover: true,
+        striped: "even",
+        withColumnBorders: false,
+        withRowBorders: false,
+      }}
+      // раскрывающиеся панели оставляем
       enableExpanding
       renderDetailPanel={({ row }) => (
-        <div style={{ padding: "16px" }}>
-          <Text w={500} mb={8}>
+        <div style={{ padding: 12 }}>
+          <Text fw={600} mb={8} ta="center">
             Все измерения
           </Text>
-          <table className={classes.MiniTable}>
+          <table className={classes.MiniTable} style={{ width: "100%" }}>
             <thead>
               <tr>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  Дата
-                </th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  N
-                </th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  P
-                </th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  K
-                </th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  Темп.
-                </th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  Влажность
-                </th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  pH
-                </th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  Осадки
-                </th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>
-                  Рекомендации
-                </th>
+                {[
+                  "Дата",
+                  "N",
+                  "P",
+                  "K",
+                  "Температура",
+                  "Влажность",
+                  "pH",
+                  "Осадки",
+                  "Рекомендация",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    style={{
+                      borderBottom: "1px solid #ccc",
+                      padding: 6,
+                      textAlign: "center",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {row.original.measurements.map((m, idx) => (
+              {row.original.measurements.map((m: any, idx: number) => (
                 <tr key={idx}>
-                  <td style={{ padding: 8 }}>
-                    <p style={{ textAlign: "center", margin: 0 }}>
-                      {dayjs(m.date).format("DD.MM.YYYY")}
-                    </p>
+                  <td style={{ padding: 6, textAlign: "center" }}>
+                    {dayjs(m.date).format("DD.MM.YYYY")}
                   </td>
-                  <td style={{ padding: 8 }}>
-                    <p style={{ textAlign: "center", margin: 0 }}>{m.N}</p>
+                  <td style={{ padding: 6, textAlign: "center" }}>{m.N}</td>
+                  <td style={{ padding: 6, textAlign: "center" }}>{m.P}</td>
+                  <td style={{ padding: 6, textAlign: "center" }}>{m.K}</td>
+                  <td style={{ padding: 6, textAlign: "center" }}>
+                    {m.temperature}
                   </td>
-                  <td style={{ padding: 8 }}>
-                    <p style={{ textAlign: "center", margin: 0 }}>{m.P}</p>
+                  <td style={{ padding: 6, textAlign: "center" }}>
+                    {m.humidity}
                   </td>
-                  <td style={{ padding: 8 }}>
-                    <p style={{ textAlign: "center", margin: 0 }}>{m.K}</p>
+                  <td style={{ padding: 6, textAlign: "center" }}>{m.ph}</td>
+                  <td style={{ padding: 6, textAlign: "center" }}>
+                    {m.rainfall}
                   </td>
-                  <td style={{ padding: 8 }}>
-                    <p style={{ textAlign: "center", margin: 0 }}>
-                      {m.temperature}
-                    </p>
-                  </td>
-                  <td style={{ padding: 8 }}>
-                    <p style={{ textAlign: "center", margin: 0 }}>
-                      {m.humidity}
-                    </p>
-                  </td>
-                  <td style={{ padding: 8 }}>
-                    <p style={{ textAlign: "center", margin: 0 }}>{m.ph}</p>
-                  </td>
-                  <td style={{ padding: 8 }}>
-                    <p style={{ textAlign: "center", margin: 0 }}>
-                      {m.rainfall}
-                    </p>
-                  </td>
-                  <td style={{ padding: 8 }}>{getRecommendationBadges(m)}</td>
+                  <td style={{ padding: 6 }}>{getRecommendationBadges(m)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      mantineTableProps={{
-        highlightOnHover: true,
-      }}
       state={{ expanded }}
       onExpandedChange={setExpanded}
     />

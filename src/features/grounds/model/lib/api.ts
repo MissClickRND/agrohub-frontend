@@ -1,9 +1,9 @@
 import apiClient from "../../../../app/api/axiosInstance";
 import { API, endpoints } from "../../../../shared/configs/apiConfigs";
-import { GroundData } from "./types";
+import { GroundData, IResponseDataGround } from "./types";
 
 export const newGroundData = async (body: GroundData) => {
-  const res = await apiClient.put(API + endpoints.NEW_LOG, {
+  const res = await apiClient.put(API + endpoints.NEW_DATA, {
     N: body.N,
     P: body.P,
     K: body.K,
@@ -21,4 +21,13 @@ export const newGroundData = async (body: GroundData) => {
   });
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка создания данных почвы");
+};
+
+export const getGroundData = async (
+  id: number
+): Promise<IResponseDataGround> => {
+  const res = await apiClient.get(API + endpoints.GET_DATA(id));
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка получения данных почвы");
+  return res.data;
 };

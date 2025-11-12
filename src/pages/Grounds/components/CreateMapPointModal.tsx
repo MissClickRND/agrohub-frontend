@@ -31,7 +31,7 @@ export default function CreateMapPointModal({
           setCoords={setCoordinates}
         />
 
-        <SetGroundInfoForm coordinates={coordinates} />
+        <SetGroundInfoForm close={onClose} coordinates={coordinates} />
       </Flex>
     </Modal>
   );

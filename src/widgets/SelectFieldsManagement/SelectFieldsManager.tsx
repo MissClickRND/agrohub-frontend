@@ -7,11 +7,10 @@ import {
   Text,
 } from "@mantine/core";
 
-import { Field } from "../../../features/Map/model/types";
+import SelectFieldTemplate from "./component/SelectFieldTemplate";
+import { Field } from "../../features/Map/model/types";
 
-import JournalFieldTemplate from "./JournalFieldTemplate";
-
-export default function JournalFieldsManagement({
+export default function SelectFieldsManager({
   data,
   isLoading,
   selectedFieldId,
@@ -23,7 +22,12 @@ export default function JournalFieldsManagement({
   onFieldSelect: (id?: number) => void;
 }) {
   return (
-    <Box p={12} pb={0} miw="280px">
+    <Box
+      p={12}
+      pb={0}
+      miw="280px"
+      style={{ borderRight: "1px solid var(--white-gray)" }}
+    >
       <Text fw={500} fz={18} mb={8}>
         Поля
       </Text>
@@ -41,7 +45,7 @@ export default function JournalFieldsManagement({
           )}
 
           {data.map((f) => (
-            <JournalFieldTemplate
+            <SelectFieldTemplate
               key={f.id ?? f.name}
               data={f}
               isSelected={selectedFieldId === f.id}
