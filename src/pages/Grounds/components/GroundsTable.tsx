@@ -1,4 +1,4 @@
-﻿// pages/Grounds/components/GroundsTable.tsx
+﻿// GroundsTable.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Group, Text } from "@mantine/core";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
@@ -16,7 +16,30 @@ import {
 import classes from "../classes/GroundTable.module.css";
 import { useGetGroundData } from "../../../features/grounds/model/lib/hooks/useGetGroundData";
 
-type BackendPoint = { type: "Point"; coordinates: [number, number] };
+// ---------- Типы твоей модели ----------
+export type GeoPolygon =
+  | { type: "Polygon"; coordinates: number[][][] } // [[[lng,lat], ...]]
+  | { type: "MultiPolygon"; coordinates: number[][][][] }; // [[[[lng,lat], ...]], ...]
+export type Zone = {
+  id?: number;
+  name: string;
+  color: string;
+  geometry: GeoPolygon;
+  soil?: string;
+  area?: number;
+};
+export type Field = {
+  id?: number;
+  name: string;
+  color: string;
+  geometry: GeoPolygon;
+  zones?: Zone[];
+  soil?: string;
+  area?: number;
+};
+
+// ---------- Типы ответа groundData ----------
+type BackendPoint = { type: "Point"; coordinates: [number, number] }; // [lng, lat]
 type BackendGround = {
   id: number;
   N: number;
@@ -36,9 +59,14 @@ type BackendField = {
   zones: BackendZone[];
 };
 
+// ---------- Тип строки таблицы ----------
 type ZoneRow = {
   zoneId: number;
   zoneName: string;
+  color?: string;
+  geometry?: GeoPolygon;
+  // превью нуждается только в координатах точек
+  measurePoints: Array<{ lng: number; lat: number }>;
   latest?: {
     date: string;
     N: number;
@@ -71,6 +99,133 @@ type ZoneRow = {
   }>;
 };
 
+type XY = { x: number; y: number };
+type LngLat = { lng: number; lat: number };
+
+const extractRings = (
+  geometry?: GeoPolygon
+): Array<Array<[number, number]>> => {
+  if (!geometry) return [];
+  // @ts-ignore
+  if (geometry.type === "Polygon") return geometry.coordinates || [];
+  if (geometry.type === "MultiPolygon") {
+    // @ts-ignore
+    return (geometry.coordinates || []).flat();
+  }
+  return [];
+};
+
+const getBounds = (rings: Array<Array<[number, number]>>) => {
+  if (!rings.length) return { minLng: 0, maxLng: 1, minLat: 0, maxLat: 1 };
+  let minLng = Infinity,
+    maxLng = -Infinity,
+    minLat = Infinity,
+    maxLat = -Infinity;
+  rings.forEach((ring) => {
+    ring.forEach(([lng, lat]) => {
+      if (lng < minLng) minLng = lng;
+      if (lng > maxLng) maxLng = lng;
+      if (lat < minLat) minLat = lat;
+      if (lat > maxLat) maxLat = lat;
+    });
+  });
+  if (
+    !isFinite(minLng) ||
+    !isFinite(maxLng) ||
+    !isFinite(minLat) ||
+    !isFinite(maxLat)
+  ) {
+    return { minLng: 0, maxLng: 1, minLat: 0, maxLat: 1 };
+  }
+
+  if (minLng === maxLng) maxLng = minLng + 1e-6;
+  if (minLat === maxLat) maxLat = minLat + 1e-6;
+  return { minLng, maxLng, minLat, maxLat };
+};
+
+const project = (
+  lng: number,
+  lat: number,
+  bounds: { minLng: number; maxLng: number; minLat: number; maxLat: number },
+  width: number,
+  height: number,
+  padding: number
+): XY => {
+  const scaleX = (width - 2 * padding) / (bounds.maxLng - bounds.minLng);
+  const scaleY = (height - 2 * padding) / (bounds.maxLat - bounds.minLat);
+  const scale = Math.min(scaleX, scaleY);
+  const x = padding + (lng - bounds.minLng) * scale;
+  const y = height - padding - (lat - bounds.minLat) * scale;
+  return { x, y };
+};
+
+const MiniZonePreview = ({
+  geometry,
+  points,
+  stroke = "#2f7e2f",
+  fill = "rgba(46, 204, 113, 0.15)",
+  width = 180,
+  height = 120,
+  padding = 8,
+}: {
+  geometry?: GeoPolygon;
+  points: LngLat[];
+  stroke?: string;
+  fill?: string;
+  width?: number;
+  height?: number;
+  padding?: number;
+}) => {
+  const rings = extractRings(geometry);
+  const bounds = getBounds(rings);
+  return (
+    <div style={{ display: "flex", justifyContent: "center" }}>
+      <svg
+        width={width}
+        height={height}
+        style={{
+          border: "1px solid #e0e0e0",
+          borderRadius: 4,
+          background: "#fff",
+        }}
+      >
+        {/* полигоны/кольца */}
+        {rings.map((ring, idx) => {
+          const pts = ring.map(([lng, lat]) =>
+            project(lng, lat, bounds, width, height, padding)
+          );
+          const d = pts.map((p) => `${p.x},${p.y}`).join(" ");
+          return (
+            <polygon
+              key={`ring-${idx}`}
+              points={d}
+              fill={fill}
+              stroke={stroke}
+              strokeWidth={2}
+            />
+          );
+        })}
+
+        {/* точки измерений */}
+        {points.map((p, idx) => {
+          const { x, y } = project(
+            p.lng,
+            p.lat,
+            bounds,
+            width,
+            height,
+            padding
+          );
+          return (
+            <circle key={`pt-${idx}`} cx={x} cy={y} r={3.5} fill="#e74c3c" />
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
+
+// ---------- рекомендации/тренды ----------
 const getTrendIcon = (current?: number, previous?: number) => {
   if (current === undefined || previous === undefined) return null;
   if (current > previous)
@@ -138,15 +293,29 @@ const getRecommendationBadges = (m?: ZoneRow["latest"]) => {
   );
 };
 
-const normalizeToRows = (data?: BackendField | null): ZoneRow[] => {
-  if (!data?.zones?.length) return [];
-  return data.zones.map<ZoneRow>((z) => {
-    const sorted = [...(z.grounds || [])].sort(
+const normalizeRows = (
+  selectedField?: Field,
+  gd?: BackendField | null
+): ZoneRow[] => {
+  if (!selectedField?.zones?.length) return [];
+
+  // карта замеров по zoneId
+  const byZone = new Map<number, BackendGround[]>();
+  if (gd?.zones?.length) {
+    gd.zones.forEach((z) => {
+      if (z?.id != null) byZone.set(z.id, z.grounds || []);
+    });
+  }
+
+  return selectedField.zones.map<ZoneRow>((z) => {
+    const zoneId = z.id ?? -1;
+    const grounds = [...(byZone.get(zoneId) || [])].sort(
       (a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf()
     );
-    const latest = sorted[0];
-    const prev = sorted[1];
-    const toRowMeas = (g: BackendGround) => ({
+    const latest = grounds[0];
+    const prev = grounds[1];
+
+    const allMeasurements = grounds.map((g) => ({
       date: g.createdAt,
       N: g.N,
       P: g.P,
@@ -159,10 +328,22 @@ const normalizeToRows = (data?: BackendField | null): ZoneRow[] => {
         g.location?.type === "Point"
           ? { lat: g.location.coordinates[1], lng: g.location.coordinates[0] }
           : undefined,
-    });
+    }));
+
+    const measurePoints = grounds
+      .map((g) =>
+        g.location?.type === "Point"
+          ? { lng: g.location.coordinates[0], lat: g.location.coordinates[1] }
+          : null
+      )
+      .filter(Boolean) as LngLat[];
+
     return {
-      zoneId: z.id,
+      zoneId,
       zoneName: z.name,
+      color: z.color,
+      geometry: z.geometry,
+      measurePoints,
       latest: latest
         ? {
             date: latest.createdAt,
@@ -186,32 +367,52 @@ const normalizeToRows = (data?: BackendField | null): ZoneRow[] => {
             rainfall: prev.Rainfall,
           }
         : undefined,
-      allMeasurements: sorted.map(toRowMeas),
+      allMeasurements,
     };
   });
 };
 
 export default function GroundsTable({
   fieldId,
+  fields,
 }: {
+  fields: Field[];
   fieldId: number | undefined;
 }) {
   const { groundData, isLoading } = useGetGroundData(fieldId);
   const [rows, setRows] = useState<ZoneRow[]>([]);
 
+  const selectedField = useMemo(
+    () => fields?.find((f) => f.id === fieldId),
+    [fields, fieldId]
+  );
+
   useEffect(() => {
-    if (!fieldId) {
-      setRows([]);
-      return;
-    }
-    setRows(normalizeToRows(groundData as BackendField | null));
-  }, [fieldId, groundData]);
+    setRows(normalizeRows(selectedField, groundData as BackendField | null));
+  }, [selectedField, groundData]);
 
   const columns = useMemo<MRT_ColumnDef<ZoneRow>[]>(
     () => [
       {
+        id: "mini",
+        header: "Миниатюра",
+        accessorFn: (row) => row.geometry, // чтобы сортировка/фильтр не падали
+        Cell: ({ row }) => (
+          <MiniZonePreview
+            geometry={row.original.geometry}
+            points={row.original.measurePoints}
+            // можно прокинуть цвет зоны в stroke/fill при желании:
+            stroke={row.original.color || "#2f7e2f"}
+            fill={
+              (row.original.color && `${row.original.color}26`) ||
+              "rgba(46, 204, 113, 0.15)"
+            } // 0x26 ≈ 15% alpha
+          />
+        ),
+      },
+      {
         accessorKey: "zoneName",
-        header: "Название",
+        header: "Зона",
         Cell: ({ cell }) => (
           <Text fw={600} ta="center">
             {cell.getValue<string>()}
@@ -253,15 +454,15 @@ export default function GroundsTable({
             >
               <span>
                 {" "}
-                N: {m.N} мг/кг {getTrendIcon(m.N, prev?.N)}{" "}
+                N: {m.N} {getTrendIcon(m.N, prev?.N)}{" "}
               </span>
               <span>
                 {" "}
-                P: {m.P} мг/кг {getTrendIcon(m.P, prev?.P)}{" "}
+                P: {m.P} {getTrendIcon(m.P, prev?.P)}{" "}
               </span>
               <span>
                 {" "}
-                K: {m.K} мг/кг {getTrendIcon(m.K, prev?.K)}{" "}
+                K: {m.K} {getTrendIcon(m.K, prev?.K)}{" "}
               </span>
             </div>
           );
@@ -383,7 +584,22 @@ export default function GroundsTable({
             <Text fw={600} mb={8} ta="center">
               Все измерения зоны «{row.original.zoneName}»
             </Text>
-            <table className={classes.MiniTable} style={{ width: "100%" }}>
+            <MiniZonePreview
+              geometry={row.original.geometry}
+              points={row.original.measurePoints}
+              stroke={row.original.color || "#2f7e2f"}
+              fill={
+                (row.original.color && `${row.original.color}26`) ||
+                "rgba(46, 204, 113, 0.1)"
+              }
+              width={320}
+              height={200}
+              padding={10}
+            />
+            <table
+              className={classes.MiniTable}
+              style={{ width: "100%", marginTop: 12 }}
+            >
               <thead>
                 <tr>
                   {[

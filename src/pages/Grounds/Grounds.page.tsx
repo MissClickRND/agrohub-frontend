@@ -33,6 +33,7 @@ const GroundsPage = () => {
           <GroundHeader open={open} />
 
           <GroundsTable
+            fields={fields}
             key={selectedFieldId ?? "no-field"}
             fieldId={selectedFieldId}
           />
