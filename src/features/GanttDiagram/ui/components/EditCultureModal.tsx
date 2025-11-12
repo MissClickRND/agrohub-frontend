@@ -80,6 +80,7 @@ export default function EditCultureModal({
       onClose={() => {
         setSubmitError(null);
         onClose();
+        form.reset();
       }}
       title="Редактирование задачи"
       centered

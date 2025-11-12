@@ -69,6 +69,7 @@ export default function CreateCultureModal({
       onClose={() => {
         setSubmitError(null);
         onClose();
+        form.reset();
       }}
       title="Создание записи культуры"
       centered

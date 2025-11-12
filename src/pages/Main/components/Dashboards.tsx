@@ -92,13 +92,13 @@ const Dashboards = () => {
       {/* Основная статистика */}
       <SimpleGrid cols={3}>
         <StatCard
-          title="Всего полей"
+          title="Всего отслеживаемых полей"
           value={mockData.summary.totalFields}
           icon={<IconMap size={32} />}
           color="var(--main-color)"
         />
         <StatCard
-          title="Всего зон"
+          title="Всего отслеживаемых зон"
           value={mockData.summary.totalZones}
           icon={<IconPlant size={32} />}
           color="var(--main-color)"

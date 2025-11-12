@@ -31,8 +31,41 @@ import { useUpdateLog } from "../model/lib/hooks/useUpdateLog";
 import { useDisclosure } from "@mantine/hooks";
 import ModalAcceptAction from "../../../widgets/ModalAcceptAction/ModalAcceptAction";
 import { useDeleteLog } from "../model/lib/hooks/useDeleteLog";
-const nextId = (list: GanttTask[]) =>
-  list.length ? Math.max(...list.map((t) => t.id)) + 1 : 1;
+
+// Функция для генерации уникальных ID
+const generateUniqueId = (existingTasks: GanttTask[]) => {
+  const maxId = existingTasks.length
+    ? Math.max(...existingTasks.map((t) => t.id))
+    : 0;
+  return maxId + 1;
+};
+
+// Функция для нормализации данных - исправление дублирующихся ID
+const normalizeTasks = (tasks: GanttTask[]): GanttTask[] => {
+  const seenIds = new Set();
+  const normalizedTasks: GanttTask[] = [];
+  let nextId = generateUniqueId(tasks);
+
+  tasks.forEach((task) => {
+    let taskId = task.id;
+
+    // Если ID уже встречался, генерируем новый уникальный ID
+    if (seenIds.has(taskId)) {
+      taskId = nextId++;
+      console.warn(
+        `Обнаружен дублирующийся ID ${task.id}. Заменен на ${taskId}`
+      );
+    }
+
+    seenIds.add(taskId);
+    normalizedTasks.push({
+      ...task,
+      id: taskId,
+    });
+  });
+
+  return normalizedTasks;
+};
 
 export default function GanttDiagram({
   data,
@@ -46,7 +79,7 @@ export default function GanttDiagram({
   onUpdateTask?: (payload: UpdateTaskPayload) => Promise<void>;
 }) {
   const { cultures } = useGetCulture();
-  const cultureList = useMemo(() => cultures, [cultures]);
+  const cultureList = useMemo(() => cultures || [], [cultures]);
   const { newLog, isLoading: LoadingFir } = useSetNewLog();
   const { updateLog, isLoading: LoadingSec } = useUpdateLog();
   const { cultureLogs, isLoading: LoadingTh } = useGetCultureLogs(data?.id);
@@ -55,7 +88,9 @@ export default function GanttDiagram({
   const [opened, { open, close }] = useDisclosure(false);
 
   useEffect(() => {
-    setTasks(cultureLogs);
+    // Нормализуем задачи при загрузке, исправляя дублирующиеся ID
+    const normalizedTasks = normalizeTasks(cultureLogs);
+    setTasks(normalizedTasks);
   }, [data?.id, cultureLogs]);
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -111,7 +146,7 @@ export default function GanttDiagram({
 
   const getCultureIdByName = (cultureName: string): string => {
     const culture = cultures.find((c) => c.name === cultureName);
-    return culture ? String(culture.id) : "";
+    return culture ? String(culture.id) : cultureName;
   };
 
   // Создание
@@ -123,16 +158,23 @@ export default function GanttDiagram({
   }) => {
     setCreating(true);
 
-    const tempId = nextId(tasks);
+    const tempId = generateUniqueId(tasks);
+
+    // Преобразуем Date объекты в строки в правильном формате
+    const startDate =
+      values.start instanceof Date ? values.start : new Date(values.start);
+    const endDate =
+      values.end instanceof Date ? values.end : new Date(values.end);
+
     const optimistic: GanttTask = {
       id: tempId,
       text: values.text.trim(),
-      start: values.start,
-      end: values.end,
+      start: startDate,
+      end: endDate,
       type: "task",
-      // @ts-ignore
-      parent: values.idParents,
+      parent: Number(values.idParents),
     };
+
     setTasks((prev) => [...prev, optimistic]);
 
     try {
@@ -146,28 +188,44 @@ export default function GanttDiagram({
         });
         if (res && typeof res.id === "number") serverId = res.id;
       } else {
+        // Правильное преобразование в ISO строку
+        const startISO =
+          optimistic.start instanceof Date
+            ? optimistic.start.toISOString()
+            : new Date(optimistic.start).toISOString();
+
+        const endISO =
+          optimistic.end instanceof Date
+            ? optimistic.end.toISOString()
+            : new Date(optimistic.end).toISOString();
+
         const result = await newLog({
           text: optimistic.text,
-          // @ts-ignore
-          start: `${optimistic.start}T13:57:48.049Z`,
-          // @ts-ignore
-          end: `${optimistic.end}T13:57:48.049Z`,
+          start: startISO,
+          end: endISO,
           parent: String(optimistic.parent),
         });
+
+        // Если сервер возвращает ID, используем его
+        if (result && result.id) {
+          serverId = result.id;
+        }
       }
 
       // выделить созданную задачу и проскроллить к ней
-      (api as any)?.exec?.("select-task", {
-        id: serverId ?? tempId,
-        show: true,
-      });
+      if (api) {
+        (api as any)?.exec?.("select-task", {
+          id: serverId ?? tempId,
+          show: true,
+        });
+      }
 
       setCreateOpen(false);
     } catch (err) {
       console.error(err);
       // откат оптимистичного добавления
       setTasks((prev) => prev.filter((t) => t.id !== tempId));
-      throw err; // чтобы модалка показала нотификацию/ошибку, если захочешь
+      throw err;
     } finally {
       setCreating(false);
     }
@@ -175,19 +233,41 @@ export default function GanttDiagram({
 
   // Редактирование
   const handleEditSubmit = async (values: {
-    text: string; // ID культуры как строка
+    text: string;
     start: Date;
     end: Date;
   }) => {
     if (!selectedTask) return;
     setUpdating(true);
 
+    // Функция для форматирования даты в ISO строку
+    const formatDateToISO = (date: Date | string): string => {
+      if (date instanceof Date) {
+        return date.toISOString();
+      }
+
+      // Если это строка, проверяем наличие Z или T
+      const dateStr = String(date);
+      if (dateStr.includes("T") || dateStr.includes("Z")) {
+        return dateStr;
+      }
+
+      // Если нет Z или T, добавляем временную метку
+      return `${dateStr}T13:35:24.656Z`;
+    };
+
+    // values.text содержит ID культуры (например "1"), находим название для отображения
     const selectedCulture = cultures.find((c) => String(c.id) === values.text);
     const cultureName = selectedCulture ? selectedCulture.name : values.text;
+    const cultureId = values.text; // Используем переданный ID напрямую
+
+    // Форматируем даты в ISO строки
+    const startISO = formatDateToISO(values.start);
+    const endISO = formatDateToISO(values.end);
 
     const updatedTask: GanttTask = {
       ...selectedTask,
-      text: getCultureIdByName(cultureName),
+      text: cultureName, // Для отображения в Gantt сохраняем название
       start: values.start,
       end: values.end,
     };
@@ -205,8 +285,22 @@ export default function GanttDiagram({
           end: values.end,
         });
       } else {
+        // Отправляем данные с cultureId (ID культуры), а не названием
         await updateLog({
-          body: updatedTask,
+          body: {
+            // Основные поля для Gantt
+            id: selectedTask.id,
+            text: String(cultureList.find((el) => el.name == cultureName)?.id), // Название для отображения
+            start: startISO,
+            end: endISO,
+            type: selectedTask.type,
+            parent: selectedTask.parent,
+
+            // Дополнительные поля, которые ожидает сервер
+            cultureId: cultureId, // Используем ID культуры, а не название
+            createdAt: startISO,
+            endAt: endISO,
+          },
           id: selectedTask.id,
         });
       }
@@ -222,9 +316,106 @@ export default function GanttDiagram({
   };
 
   const handleDeleteTask = () => {
-    deleteLog(selectedId);
+    if (selectedId) {
+      deleteLog(selectedId);
+      setTasks((prev) => prev.filter((task) => task.id !== selectedId));
+      setSelectedId(null);
+    }
     close();
   };
+
+  // Функция для вычисления дат summary на основе дочерних задач
+  const calculateSummaryDates = (tasks: GanttTask[]): GanttTask[] => {
+    const summaryTasks = tasks.filter((task) => task.type === "summary");
+
+    return tasks.map((task) => {
+      if (task.type === "summary") {
+        // Находим все дочерние задачи
+        const childTasks = tasks.filter(
+          (t) => t.parent === task.id && t.type === "task"
+        );
+
+        if (childTasks.length > 0) {
+          // Находим самую раннюю дату начала
+          const minStart = new Date(
+            Math.min(
+              ...childTasks
+                .filter((t) => t.start)
+                .map((t) => new Date(t.start!).getTime())
+            )
+          );
+
+          // Находим самую позднюю дату окончания
+          const maxEnd = new Date(
+            Math.max(
+              ...childTasks
+                .filter((t) => t.end)
+                .map((t) => new Date(t.end!).getTime())
+            )
+          );
+
+          // Возвращаем summary с вычисленными датами
+          return {
+            ...task,
+            start: minStart,
+            end: maxEnd,
+          };
+        }
+      }
+      return task;
+    });
+  };
+
+  // Функция для нормализации данных - исправление дублирующихся ID и вычисление дат summary
+  const normalizeTasks = (tasks: GanttTask[]): GanttTask[] => {
+    const seenIds = new Set();
+    const normalizedTasks: GanttTask[] = [];
+    let nextId = generateUniqueId(tasks);
+
+    tasks.forEach((task) => {
+      let taskId = task.id;
+
+      // Если ID уже встречался, генерируем новый уникальный ID
+      if (seenIds.has(taskId)) {
+        taskId = nextId++;
+        console.warn(
+          `Обнаружен дублирующийся ID ${task.id}. Заменен на ${taskId}`
+        );
+      }
+
+      seenIds.add(taskId);
+
+      // Копируем задачу с новым ID если нужно
+      const normalizedTask =
+        taskId !== task.id ? { ...task, id: taskId } : task;
+
+      normalizedTasks.push(normalizedTask);
+    });
+
+    // Вычисляем даты для summary задач
+    return calculateSummaryDates(normalizedTasks);
+  };
+
+  useEffect(() => {
+    // Нормализуем задачи при загрузке, исправляя дублирующиеся ID
+    let normalizedTasks = normalizeTasks(cultureLogs);
+
+    // Дополнительно убеждаемся, что все summary имеют правильные даты
+    normalizedTasks = calculateSummaryDates(normalizedTasks);
+
+    setTasks(normalizedTasks);
+  }, [data?.id, cultureLogs]);
+
+  // Также обновляем summary при изменении задач
+  useEffect(() => {
+    if (tasks.length > 0) {
+      const updatedTasks = calculateSummaryDates(tasks);
+      // Обновляем только если даты изменились
+      if (JSON.stringify(updatedTasks) !== JSON.stringify(tasks)) {
+        setTasks(updatedTasks);
+      }
+    }
+  }, [tasks]);
 
   return (
     <Box style={{ width: "calc(100% - 280px)" }} pos="relative">
@@ -323,7 +514,7 @@ export default function GanttDiagram({
         onClose={() => setEditOpen(false)}
         onSubmit={handleEditSubmit}
         initial={{
-          text: selectedTask ? getCultureIdByName(selectedTask.text) : "", // Преобразуем название в ID
+          text: selectedTask ? getCultureIdByName(selectedTask.text) : "",
           start: selectedTask?.start ?? null,
           end: selectedTask?.end ?? null,
         }}

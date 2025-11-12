@@ -17,8 +17,8 @@ export type CreateTaskPayload = {
 export type UpdateTaskPayload = {
   id: number;
   text?: string;
-  start?: Date;
-  end?: Date;
+  start?: Date | string;
+  end?: Date | string;
   parent?: number;
 };
 
