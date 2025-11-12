@@ -66,3 +66,11 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.leaflet-container .leaflet-interactive:focus {
+  outline: none;
+}
+
+.leaflet-container .leaflet-interactive {
+  outline: none;
+}

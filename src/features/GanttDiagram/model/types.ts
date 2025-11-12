@@ -25,6 +25,7 @@ export type UpdateTaskPayload = {
 export type Culture = {
   id: number;
   name: string;
+  color?: string;
 };
 
 export type ISetTask = {

@@ -46,7 +46,6 @@ export default function GanttDiagram({
   onUpdateTask?: (payload: UpdateTaskPayload) => Promise<void>;
 }) {
   const { cultures } = useGetCulture();
-
   const cultureList = useMemo(() => cultures, [cultures]);
   const { newLog, isLoading: LoadingFir } = useSetNewLog();
   const { updateLog, isLoading: LoadingSec } = useUpdateLog();
