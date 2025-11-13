@@ -88,7 +88,8 @@ export const useChat = () => {
 
   const handleSendMessage = () => {
     if (!currentFieldId) showError("Выберите поле");
-    (async () => {if (currentMessage && currentFieldId) {
+    (async () => {if (currentMessage && currentFieldId && isSendAvailable) {
+      setCurrentMessage("")
       const newMessages = [...messages]
         try {
       setIsSendAvailable(false);
@@ -102,7 +103,6 @@ export const useChat = () => {
         prompt: currentMessage,
         fieldId: currentFieldId,
       });
-      setCurrentMessage("")
       setMessages([
         ...newMessages,
         { author: "agent", id: newMessages.length, content: res.response },
@@ -111,7 +111,6 @@ export const useChat = () => {
 
         } catch {
             setMessages([...newMessages, {author: "agent", id: newMessages.length, content: "Произошла ошибка, проверьте соединение с сетью и попробуйте ещё раз"}])
-            setCurrentMessage("")
         } finally {
             setIsSendAvailable(true)
         }
