@@ -1,6 +1,6 @@
 ﻿// pages/Grounds/GroundsPage.tsx
-import { Flex, Stack } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { em, Flex, Stack } from "@mantine/core";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 
 import GroundsTable from "./components/GroundsTable";
@@ -10,6 +10,7 @@ import SelectFieldsManager from "../../widgets/SelectFieldsManagement/SelectFiel
 import GroundHeader from "./components/GroundHeader";
 
 const GroundsPage = () => {
+  const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
   const { fields, isLoading } = useGetFields();
   const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>();
   const [opened, { open, close }] = useDisclosure(false);
@@ -21,7 +22,7 @@ const GroundsPage = () => {
   return (
     <>
       <CreateMapPointModal opened={opened} onClose={close} />
-      <Flex h="100%">
+      <Flex h="100%" direction={isMobile ? "column" : "row"}>
         <SelectFieldsManager
           isLoading={isLoading}
           data={fields}
@@ -29,7 +30,10 @@ const GroundsPage = () => {
           onFieldSelect={setSelectedFieldId}
         />
 
-        <Stack gap={0} style={{ width: "calc(100% - 280px)" }}>
+        <Stack
+          gap={0}
+          style={{ width: isMobile ? "100%" : "calc(100% - 280px)" }}
+        >
           <GroundHeader open={open} />
 
           <GroundsTable

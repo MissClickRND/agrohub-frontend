@@ -1,14 +1,17 @@
 ﻿import { NavLink, useLocation } from "react-router-dom";
-import { ActionIcon, Stack, Tooltip } from "@mantine/core";
+import { ActionIcon, Button, em, Flex, Stack, Tooltip } from "@mantine/core";
 import classes from "./classes/NavBarNested.module.css";
 import navbarLinks from "./navbarLinks";
 import { LinksGroup } from "./components/NavBarLinksGroup";
+import { useMediaQuery } from "@mantine/hooks";
+import { useLogout } from "../../features/auth/model/lib/hooks/useLogout";
 
 type Props = { expanded: boolean };
 
 export default function NavbarNested({ expanded }: Props) {
+  const { logout } = useLogout();
   const location = useLocation();
-
+  const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
   if (!expanded) {
     // только иконки
     return (
@@ -46,12 +49,23 @@ export default function NavbarNested({ expanded }: Props) {
   // развернуто: текстовые пункты/группы
   return (
     <nav className={classes.navbar}>
-      <Stack p={16} className={classes.linksInner}>
-        {navbarLinks.map((item) => (
-          <LinksGroup {...item} key={item.label} />
-        ))}
-      </Stack>
-
+      <Flex justify="space-between" h="100%" direction="column" p={16}>
+        <Stack h="100%" className={classes.linksInner}>
+          {navbarLinks.map((item) => (
+            <LinksGroup {...item} key={item.label} />
+          ))}
+        </Stack>
+        {isMobile && (
+          <Button
+            onClick={logout}
+            style={{ justifySelf: "end" }}
+            color="red"
+            variant="outline"
+          >
+            Выйти из аккаунта
+          </Button>
+        )}
+      </Flex>
       <div className={classes.footer} />
     </nav>
   );

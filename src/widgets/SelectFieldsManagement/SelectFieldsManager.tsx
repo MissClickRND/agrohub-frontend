@@ -31,7 +31,7 @@ export default function SelectFieldsManager({
       <Text fw={500} fz={18} mb={8}>
         Поля
       </Text>
-      <ScrollArea scrollbarSize={6} h="85vh">
+      <ScrollArea scrollbarSize={6}>
         <Stack gap={8} pos="relative">
           {isLoading && (
             <LoadingOverlay visible>

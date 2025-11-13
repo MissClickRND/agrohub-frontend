@@ -24,7 +24,7 @@ type FieldT = {
 
 type Props = {
   fields: FieldT[] | undefined;
-  coords: number[] | null; // [lon, lat]
+  coords: number[] | null;
   setCoords: (c: number[] | null) => void;
 };
 
@@ -76,13 +76,17 @@ export default function MapSetPoint({ fields, coords, setCoords }: Props) {
   });
 
   const handleClickLatLng = (lat: number, lng: number) => {
-    setCoords([lng, lat]); // маркер теперь будет двигаться за coords
+    setCoords([lng, lat]);
   };
 
   return (
     <MapContainer
       attributionControl={false}
-      style={{ width: "30vw", height: "60vh", borderRadius: 12 }}
+      style={{
+        width: "100%",
+        height: "100%",
+        borderRadius: 0,
+      }}
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
       whenReady={(e) => {
@@ -115,7 +119,7 @@ export default function MapSetPoint({ fields, coords, setCoords }: Props) {
             <div>
               <b>{f.name}</b>
               <br />
-              Площадь: {Math.round(f.area / 10000)} га
+              Площадь: {Math.round((f.area || 0) / 10000)} га
             </div>
           </Tooltip>
         </GeoJSON>
@@ -140,17 +144,16 @@ export default function MapSetPoint({ fields, coords, setCoords }: Props) {
                 <br />
                 Поле: {f.name}
                 <br />
-                Площадь:{Math.round(f.area / 10000)} га
+                Площадь: {Math.round((f.area || 0) / 10000)} га
               </div>
             </Tooltip>
           </GeoJSON>
         ))
       )}
 
-      {/* Маркер теперь привязан к текущим coords и будет перемещаться */}
       {coords && (
         <GeoJSON
-          key={`point-${coords[0]}-${coords[1]}`} // ключ включает координаты — форсит перерисовку
+          key={`point-${coords[0]}-${coords[1]}`}
           data={
             {
               type: "Feature",
@@ -159,7 +162,13 @@ export default function MapSetPoint({ fields, coords, setCoords }: Props) {
             } as any
           }
           pointToLayer={(_, latlng) =>
-            L.circleMarker(latlng, { radius: 6, weight: 2, fillOpacity: 1 })
+            L.circleMarker(latlng, {
+              radius: 8,
+              weight: 3,
+              fillOpacity: 1,
+              color: "#ff0000",
+              fillColor: "#ff0000",
+            })
           }
         />
       )}

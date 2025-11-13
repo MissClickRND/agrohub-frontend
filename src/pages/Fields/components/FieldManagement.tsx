@@ -27,7 +27,12 @@ export default function FieldManagement({
   onToggleFieldDrawing: () => void;
 }) {
   return (
-    <Box p={12} pb={0} w={280}>
+    <Box
+      p={12}
+      pb={0}
+      w={{ base: "100%", sm: 280 }}
+      h={{ base: "auto", sm: "100vh" }}
+    >
       <Text fw={600} mb={8}>
         Поля
       </Text>
@@ -41,7 +46,10 @@ export default function FieldManagement({
         {isFieldDrawing ? <IconX /> : <IconPlus />}
         {isFieldDrawing ? "Отменить" : "Создать поле"}
       </Button>
-      <ScrollArea scrollbarSize={6} h="85vh">
+      <ScrollArea
+        scrollbarSize={6}
+        h={{ base: 200, sm: "calc(100vh - 100px)" }}
+      >
         <Stack gap={8} pos="relative">
           {isLoading && (
             <LoadingOverlay visible>

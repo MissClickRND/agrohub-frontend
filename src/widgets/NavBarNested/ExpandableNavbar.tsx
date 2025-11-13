@@ -51,7 +51,6 @@ export default function ExpandableNavbar({
       <AnimatePresence>
         {isMobile && expanded && (
           <motion.div
-            className={classes.backdrop}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.25 }}
             exit={{ opacity: 0 }}

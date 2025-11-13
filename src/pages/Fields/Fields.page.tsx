@@ -1,5 +1,5 @@
 ﻿import { useRef, useState } from "react";
-import { Grid } from "@mantine/core";
+import { Grid, Box } from "@mantine/core";
 import FieldManagement from "./components/FieldManagement";
 import FieldViewer, { FieldViewerHandle } from "./components/FieldViewer";
 import { useGetFields } from "../../features/Map/model/lib/hooks/useGetFields";
@@ -26,32 +26,34 @@ const Fields = () => {
   };
 
   return (
-    <Grid gutter={0} h={"100%"} styles={{ inner: { height: "100%" } }}>
-      <Grid.Col
-        style={{ borderRight: "1px solid var(--white-gray)" }}
-        span={"content"}
-      >
-        <FieldManagement
-          isLoading={isLoading}
-          data={fields}
-          selectedFieldId={selectedFieldId}
-          onFieldSelect={setSelectedFieldId}
-          isFieldDrawing={mode === "field"}
-          onToggleFieldDrawing={toggleFieldDrawing}
-        />
-      </Grid.Col>
+    <Box h="100vh">
+      <Grid gutter={0} h="100%" styles={{ inner: { height: "100%" } }}>
+        <Grid.Col
+          style={{ borderRight: "1px solid var(--white-gray)" }}
+          span={{ base: 12, sm: "content" }}
+        >
+          <FieldManagement
+            isLoading={isLoading}
+            data={fields}
+            selectedFieldId={selectedFieldId}
+            onFieldSelect={setSelectedFieldId}
+            isFieldDrawing={mode === "field"}
+            onToggleFieldDrawing={toggleFieldDrawing}
+          />
+        </Grid.Col>
 
-      <Grid.Col span={"auto"}>
-        <FieldViewer
-          ref={viewerRef}
-          fields={fields}
-          selectedFieldId={selectedFieldId}
-          isZoneDrawing={mode === "zone"}
-          onToggleZoneDrawing={toggleZoneDrawing}
-          onMapModeChange={onMapModeChange}
-        />
-      </Grid.Col>
-    </Grid>
+        <Grid.Col span={{ base: 12, sm: "auto" }}>
+          <FieldViewer
+            ref={viewerRef}
+            fields={fields}
+            selectedFieldId={selectedFieldId}
+            isZoneDrawing={mode === "zone"}
+            onToggleZoneDrawing={toggleZoneDrawing}
+            onMapModeChange={onMapModeChange}
+          />
+        </Grid.Col>
+      </Grid>
+    </Box>
   );
 };
 

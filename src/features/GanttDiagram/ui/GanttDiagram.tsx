@@ -32,7 +32,6 @@ import { useDisclosure } from "@mantine/hooks";
 import ModalAcceptAction from "../../../widgets/ModalAcceptAction/ModalAcceptAction";
 import { useDeleteLog } from "../model/lib/hooks/useDeleteLog";
 
-// Функция для генерации уникальных ID
 const generateUniqueId = (existingTasks: GanttTask[]) => {
   const maxId = existingTasks.length
     ? Math.max(...existingTasks.map((t) => t.id))
@@ -40,7 +39,6 @@ const generateUniqueId = (existingTasks: GanttTask[]) => {
   return maxId + 1;
 };
 
-// Функция для нормализации данных - исправление дублирующихся ID
 const normalizeTasks = (tasks: GanttTask[]): GanttTask[] => {
   const seenIds = new Set();
   const normalizedTasks: GanttTask[] = [];
@@ -49,7 +47,6 @@ const normalizeTasks = (tasks: GanttTask[]): GanttTask[] => {
   tasks.forEach((task) => {
     let taskId = task.id;
 
-    // Если ID уже встречался, генерируем новый уникальный ID
     if (seenIds.has(taskId)) {
       taskId = nextId++;
       console.warn(
@@ -88,7 +85,6 @@ export default function GanttDiagram({
   const [opened, { open, close }] = useDisclosure(false);
 
   useEffect(() => {
-    // Нормализуем задачи при загрузке, исправляя дублирующиеся ID
     const normalizedTasks = normalizeTasks(cultureLogs);
     setTasks(normalizedTasks);
   }, [data?.id, cultureLogs]);
@@ -104,15 +100,12 @@ export default function GanttDiagram({
 
   const { deleteLog } = useDeleteLog();
 
-  // модалки
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  // статусы запросов
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
 
-  // подписка на выбор задачи в гантте
   useEffect(() => {
     if (!api) return;
     const anyApi = api as any;
@@ -137,7 +130,6 @@ export default function GanttDiagram({
     return () => off?.();
   }, [api]);
 
-  // открыть модалки
   const openCreate = () => setCreateOpen(true);
   const openEdit = () => {
     if (!selectedTask) return;
@@ -149,7 +141,6 @@ export default function GanttDiagram({
     return culture ? String(culture.id) : cultureName;
   };
 
-  // Создание
   const handleCreateSubmit = async (values: {
     text: string;
     start: Date;
@@ -160,7 +151,6 @@ export default function GanttDiagram({
 
     const tempId = generateUniqueId(tasks);
 
-    // Преобразуем Date объекты в строки в правильном формате
     const startDate =
       values.start instanceof Date ? values.start : new Date(values.start);
     const endDate =
@@ -188,7 +178,6 @@ export default function GanttDiagram({
         });
         if (res && typeof res.id === "number") serverId = res.id;
       } else {
-        // Правильное преобразование в ISO строку
         const startISO =
           optimistic.start instanceof Date
             ? optimistic.start.toISOString()
@@ -206,13 +195,11 @@ export default function GanttDiagram({
           parent: String(optimistic.parent),
         });
 
-        // Если сервер возвращает ID, используем его
         if (result && result.id) {
           serverId = result.id;
         }
       }
 
-      // выделить созданную задачу и проскроллить к ней
       if (api) {
         (api as any)?.exec?.("select-task", {
           id: serverId ?? tempId,
@@ -223,7 +210,6 @@ export default function GanttDiagram({
       setCreateOpen(false);
     } catch (err) {
       console.error(err);
-      // откат оптимистичного добавления
       setTasks((prev) => prev.filter((t) => t.id !== tempId));
       throw err;
     } finally {
@@ -231,7 +217,6 @@ export default function GanttDiagram({
     }
   };
 
-  // Редактирование
   const handleEditSubmit = async (values: {
     text: string;
     start: Date;
@@ -240,34 +225,29 @@ export default function GanttDiagram({
     if (!selectedTask) return;
     setUpdating(true);
 
-    // Функция для форматирования даты в ISO строку
     const formatDateToISO = (date: Date | string): string => {
       if (date instanceof Date) {
         return date.toISOString();
       }
 
-      // Если это строка, проверяем наличие Z или T
       const dateStr = String(date);
       if (dateStr.includes("T") || dateStr.includes("Z")) {
         return dateStr;
       }
 
-      // Если нет Z или T, добавляем временную метку
       return `${dateStr}T13:35:24.656Z`;
     };
 
-    // values.text содержит ID культуры (например "1"), находим название для отображения
     const selectedCulture = cultures.find((c) => String(c.id) === values.text);
     const cultureName = selectedCulture ? selectedCulture.name : values.text;
-    const cultureId = values.text; // Используем переданный ID напрямую
+    const cultureId = values.text;
 
-    // Форматируем даты в ISO строки
     const startISO = formatDateToISO(values.start);
     const endISO = formatDateToISO(values.end);
 
     const updatedTask: GanttTask = {
       ...selectedTask,
-      text: cultureName, // Для отображения в Gantt сохраняем название
+      text: cultureName,
       start: values.start,
       end: values.end,
     };
@@ -285,19 +265,15 @@ export default function GanttDiagram({
           end: values.end,
         });
       } else {
-        // Отправляем данные с cultureId (ID культуры), а не названием
         await updateLog({
           body: {
-            // Основные поля для Gantt
             id: selectedTask.id,
-            text: String(cultureList.find((el) => el.name == cultureName)?.id), // Название для отображения
+            text: String(cultureList.find((el) => el.name == cultureName)?.id),
             start: startISO,
             end: endISO,
             type: selectedTask.type,
             parent: selectedTask.parent,
-
-            // Дополнительные поля, которые ожидает сервер
-            cultureId: cultureId, // Используем ID культуры, а не название
+            cultureId: cultureId,
             createdAt: startISO,
             endAt: endISO,
           },
@@ -324,19 +300,16 @@ export default function GanttDiagram({
     close();
   };
 
-  // Функция для вычисления дат summary на основе дочерних задач
   const calculateSummaryDates = (tasks: GanttTask[]): GanttTask[] => {
     const summaryTasks = tasks.filter((task) => task.type === "summary");
 
     return tasks.map((task) => {
       if (task.type === "summary") {
-        // Находим все дочерние задачи
         const childTasks = tasks.filter(
           (t) => t.parent === task.id && t.type === "task"
         );
 
         if (childTasks.length > 0) {
-          // Находим самую раннюю дату начала
           const minStart = new Date(
             Math.min(
               ...childTasks
@@ -345,7 +318,6 @@ export default function GanttDiagram({
             )
           );
 
-          // Находим самую позднюю дату окончания
           const maxEnd = new Date(
             Math.max(
               ...childTasks
@@ -354,7 +326,6 @@ export default function GanttDiagram({
             )
           );
 
-          // Возвращаем summary с вычисленными датами
           return {
             ...task,
             start: minStart,
@@ -366,51 +337,15 @@ export default function GanttDiagram({
     });
   };
 
-  // Функция для нормализации данных - исправление дублирующихся ID и вычисление дат summary
-  const normalizeTasks = (tasks: GanttTask[]): GanttTask[] => {
-    const seenIds = new Set();
-    const normalizedTasks: GanttTask[] = [];
-    let nextId = generateUniqueId(tasks);
-
-    tasks.forEach((task) => {
-      let taskId = task.id;
-
-      // Если ID уже встречался, генерируем новый уникальный ID
-      if (seenIds.has(taskId)) {
-        taskId = nextId++;
-        console.warn(
-          `Обнаружен дублирующийся ID ${task.id}. Заменен на ${taskId}`
-        );
-      }
-
-      seenIds.add(taskId);
-
-      // Копируем задачу с новым ID если нужно
-      const normalizedTask =
-        taskId !== task.id ? { ...task, id: taskId } : task;
-
-      normalizedTasks.push(normalizedTask);
-    });
-
-    // Вычисляем даты для summary задач
-    return calculateSummaryDates(normalizedTasks);
-  };
-
   useEffect(() => {
-    // Нормализуем задачи при загрузке, исправляя дублирующиеся ID
     let normalizedTasks = normalizeTasks(cultureLogs);
-
-    // Дополнительно убеждаемся, что все summary имеют правильные даты
     normalizedTasks = calculateSummaryDates(normalizedTasks);
-
     setTasks(normalizedTasks);
   }, [data?.id, cultureLogs]);
 
-  // Также обновляем summary при изменении задач
   useEffect(() => {
     if (tasks.length > 0) {
       const updatedTasks = calculateSummaryDates(tasks);
-      // Обновляем только если даты изменились
       if (JSON.stringify(updatedTasks) !== JSON.stringify(tasks)) {
         setTasks(updatedTasks);
       }
@@ -418,32 +353,35 @@ export default function GanttDiagram({
   }, [tasks]);
 
   return (
-    <Box style={{ width: "calc(100% - 280px)" }} pos="relative">
+    <Box w={{ base: "100%", sm: "calc(100% - 280px)" }} pos="relative">
       <Locale words={ru}>
         <Willow>
-          <Flex mah={78.5} align="center" justify="space-between" p={16}>
+          <Flex
+            align="center"
+            justify="space-between"
+            p={16}
+            direction={{ base: "column", sm: "row" }}
+            gap={{ base: "md", sm: "none" }}
+          >
             <Box>
-              <Text fw={500} fz={18}>
+              <Text fw={500} fz={18} ta={{ base: "center", sm: "left" }}>
                 Журнал поля: {data?.name}
               </Text>
               <Text
                 fw={400}
                 c="var(--subtitle)"
                 fz={12}
-                style={{ textWrap: "nowrap" }}
+                ta={{ base: "center", sm: "left" }}
               >
                 Здесь вы видите записи по посадкам культур
               </Text>
             </Box>
 
-            <div
-              className={styles.toolbarRight}
-              style={{
-                display: "flex",
-                justifyContent: "end",
-                gap: 8,
-                padding: 14,
-              }}
+            <Flex
+              gap={8}
+              justify={{ base: "center", sm: "end" }}
+              wrap="wrap"
+              w={{ base: "100%", sm: "auto" }}
             >
               <Button
                 size="xs"
@@ -458,22 +396,25 @@ export default function GanttDiagram({
                 variant="filled"
                 onClick={openEdit}
                 disabled={!selectedTask}
-                title={
-                  selectedTask
-                    ? "Редактировать выбранную задачу"
-                    : "Выберите задачу в диаграмме"
-                }
                 leftSection={<IconEdit size={16} />}
               >
                 Редактировать
               </Button>
-              <ActionIcon disabled={!selectedTask} color="red" onClick={open}>
+              <ActionIcon
+                disabled={!selectedTask}
+                color="red"
+                onClick={open}
+                size="30px"
+              >
                 <IconTrash />
               </ActionIcon>
-            </div>
+            </Flex>
           </Flex>
 
-          <div className={styles.ganttShell}>
+          <Box
+            className={styles.ganttShell}
+            h={{ base: 400, sm: "calc(100vh - 150px)" }}
+          >
             {LoadingFir || LoadingSec || LoadingTh ? (
               <LoadingOverlay visible={LoadingFir || LoadingSec || LoadingTh}>
                 <Loader />
@@ -487,7 +428,7 @@ export default function GanttDiagram({
                 readonly
               />
             )}
-          </div>
+          </Box>
         </Willow>
       </Locale>
 

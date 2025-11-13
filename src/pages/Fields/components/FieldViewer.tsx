@@ -50,10 +50,16 @@ const FieldViewer = forwardRef<
     );
 
     return (
-      <Box h="100%">
+      <Box h="100vh">
         <Box h="100%" bdrs={8} w="100%">
           {selectedField ? (
-            <Flex align="center" justify="space-between" p={16}>
+            <Flex
+              align="center"
+              justify="space-between"
+              p={16}
+              wrap="wrap"
+              gap="md"
+            >
               <Box>
                 <Text fw={500} fz={18}>
                   Поле: {selectedField.name}
@@ -84,8 +90,16 @@ const FieldViewer = forwardRef<
             </Flex>
           )}
 
-          <Flex flex={1} h={"calc(100% - 78.5px)"} gap={20}>
-            <Box h={"100%"} w={selectedFieldId ? "80%" : "100%"}>
+          <Flex
+            flex={1}
+            h={"calc(100% - 78.5px)"}
+            gap={20}
+            direction={{ base: "column", lg: "row" }}
+          >
+            <Box
+              h={"100%"}
+              w={{ base: "100%", lg: selectedFieldId ? "80%" : "100%" }}
+            >
               <AgroHubMap
                 ref={mapRef}
                 fields={fields}
@@ -98,11 +112,10 @@ const FieldViewer = forwardRef<
             {selectedFieldId && (
               <Box
                 style={{
-                  borderRadius: "8px 0px 8px 0px",
-                  borderBottom: "0",
-                  borderRight: "0",
+                  borderRadius: "8px",
                 }}
-                w="20%"
+                w={{ base: "100%", lg: "20%" }}
+                h={{ base: 300, lg: "100%" }}
                 bd={"1px solid var(--white-gray)"}
               >
                 <Text

@@ -1,7 +1,9 @@
-import { Box, Text, Flex, Button } from "@mantine/core";
+import { Box, Text, Flex, Button, em } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { IconMap } from "@tabler/icons-react";
 
 export default function GroundHeader({ open }: { open: any }) {
+  const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
   return (
     <Flex
       style={{ borderBottom: "1px solid var(--white-gray)" }}
@@ -21,7 +23,7 @@ export default function GroundHeader({ open }: { open: any }) {
 
       <Button color="var(--main-color)" onClick={() => open()}>
         <IconMap />
-        Внести данные
+        {isMobile ? null : "Внести данные"}
       </Button>
     </Flex>
   );

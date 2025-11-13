@@ -8,6 +8,7 @@ import {
   SimpleGrid,
   ThemeIcon,
   Flex,
+  useMantineTheme,
 } from "@mantine/core";
 import {
   LineChart,
@@ -27,7 +28,6 @@ import {
   IconPlaystationCircle,
 } from "@tabler/icons-react";
 
-// Моковые данные для дашбордов
 const mockData = {
   summary: {
     totalFields: 24,
@@ -50,7 +50,6 @@ const mockData = {
   ],
 };
 
-// Компонент карточки статистики
 const StatCard = ({ title, value, icon }: any) => (
   <Card shadow="sm" p="lg" radius="md" withBorder>
     <Flex justify="space-between">
@@ -71,7 +70,6 @@ const StatCard = ({ title, value, icon }: any) => (
   </Card>
 );
 
-// Кастомный тултип для графика
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -87,33 +85,30 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const Dashboards = () => {
+  const theme = useMantineTheme();
+
   return (
     <Stack>
-      {/* Основная статистика */}
-      <SimpleGrid cols={3}>
+      <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
         <StatCard
           title="Всего отслеживаемых полей"
           value={mockData.summary.totalFields}
           icon={<IconMap size={32} />}
-          color="var(--main-color)"
         />
         <StatCard
           title="Всего отслеживаемых зон"
           value={mockData.summary.totalZones}
           icon={<IconPlant size={32} />}
-          color="var(--main-color)"
         />
         <StatCard
           title="Средний показатель зон в одном поле"
           value={mockData.summary.averageZonesPerField}
           icon={<IconTrendingUp size={32} />}
-          color="var(--main-color)"
         />
       </SimpleGrid>
 
       <Grid>
-        {/* Химический состав - LineChart */}
-        <Grid.Col>
+        <Grid.Col span={{ base: 12, lg: 6 }}>
           <Card
             shadow="sm"
             p="lg"
@@ -121,8 +116,8 @@ const Dashboards = () => {
             withBorder
             style={{ height: "400px" }}
           >
-            <Flex justify="space-between" align="center">
-              <Group mb="md" gap={4} align="center">
+            <Flex justify="space-between" align="center" wrap="wrap" gap="md">
+              <Group gap={4} align="center">
                 <IconChartBar
                   size={24}
                   style={{ color: "var(--main-color)" }}
@@ -133,7 +128,7 @@ const Dashboards = () => {
               </Group>
               <Flex gap={4} align="center">
                 <IconPlaystationCircle size={18} />
-                <Text fz={16} size="lg" fw={500}>
+                <Text fz={16} fw={500}>
                   Значение (мг/кг)
                 </Text>
               </Flex>
@@ -144,10 +139,16 @@ const Dashboards = () => {
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="type" height={80} interval={0} />
-                <YAxis />
+                <XAxis
+                  dataKey="type"
+                  height={80}
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  fontSize={12}
+                />
+                <YAxis fontSize={12} />
                 <Tooltip content={<CustomTooltip />} />
-
                 <Line
                   type="monotone"
                   dataKey="value"
@@ -162,8 +163,7 @@ const Dashboards = () => {
           </Card>
         </Grid.Col>
 
-        {/* Распределение культур */}
-        <Grid.Col>
+        <Grid.Col span={{ base: 12, lg: 6 }}>
           <Card
             shadow="sm"
             p="lg"
@@ -182,11 +182,10 @@ const Dashboards = () => {
               align="center"
               justify="center"
               gap="xl"
+              wrap="nowrap"
               style={{ height: "320px" }}
             >
-              <div
-                style={{ flex: 1, display: "flex", justifyContent: "center" }}
-              >
+              <Flex justify="center" style={{ flex: 1 }}>
                 <PieChart
                   labelsPosition="outside"
                   labelsType="percent"
@@ -194,11 +193,10 @@ const Dashboards = () => {
                   data={mockData.crops}
                   withTooltip
                   tooltipDataSource="segment"
-                  size={200}
                 />
-              </div>
+              </Flex>
 
-              <Stack gap="md" style={{ flex: 2 }}>
+              <Stack gap="md" style={{ flex: 2 }} visibleFrom="sm">
                 <Text size="sm" fw={600}>
                   Распределение по убыванию:
                 </Text>
