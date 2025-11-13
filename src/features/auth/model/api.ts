@@ -11,15 +11,15 @@ export const login = async (body: ILoginRequest) => {
 };
 
 export const register = async (body: IRegisterRequest) => {
-  const res = await axios.post(API + endpoints.REGISTER, body);
+  const res = await axios.post(API + endpoints.REGISTER, {
+    username: body.name,
+    email: body.email,
+    password: body.password,
+    firstName: "PASS",
+    lastName: "HALKA",
+  });
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка регистрации");
-};
-
-export const logout = async () => {
-  const res = await apiClient.post(API + endpoints.LOGOUT);
-  if (res.status !== 200 && res.status !== 201)
-    throw new Error("Ошибка выхода");
 };
 
 export const userInfo = async () => {

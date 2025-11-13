@@ -2,8 +2,8 @@ export const API = "http://26.118.155.2:4000";
 
 export const endpoints = {
   LOGIN: "/api/auth/login",
+  REGISTER: "/api/auth/register",
   USER_INFO: "/gate/me/profile",
-  // REGISTER: "/register",
 
   // поля
   GET_FIELDS: "/api/fields/list",

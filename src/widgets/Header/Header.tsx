@@ -37,35 +37,26 @@ function Header({ burgerOpened, burgerToggle }: Props) {
       />
       <Stack p={20} justify={"center"} h={"100%"}>
         <Group align={"center"} justify={"space-between"}>
-          <Box>
-            <Group align={"center"}>
-              <Burger
-                lineSize={1}
-                size={16}
-                opened={burgerOpened}
-                onClick={burgerToggle}
-                hiddenFrom="sm"
-              />
-              <Group gap={6} px={4}>
-                <img src="/icons/Logo.svg" style={{ width: "35px" }} />
-                <Text fw={600}>АгроХаб</Text>
-              </Group>
-              <Box visibleFrom={"sm"}>
-                <AgrohubSpotlightButton onClick={spotlight.open} />
-              </Box>
+          <Group align={"center"}>
+            <Group gap={6} px={4}>
+              <img src="/icons/Logo.svg" style={{ width: "35px" }} />
+              <Text fw={600}>АгроХаб</Text>
             </Group>
+          </Group>
+          <Box visibleFrom={"sm"}>
+            <AgrohubSpotlightButton onClick={spotlight.open} />
           </Box>
-
           <Box>
             <Group gap={10}>
               <Box
                 visibleFrom={"sm"}
-                bdrs={4}
                 pr={10}
+                h={36}
                 bd={`1px solid ${theme.colors.primary[4]}`}
+                bdrs={8}
               >
                 <Group gap={5}>
-                  <IconUser size={32} color={theme.colors.primary[4]} />
+                  <IconUser size={33} color={theme.colors.primary[4]} />
                   <Text fz={15} fw={600}>
                     {userName}
                   </Text>
@@ -77,11 +68,19 @@ function Header({ burgerOpened, burgerToggle }: Props) {
                 onClick={open}
                 visibleFrom={"sm"}
                 variant={"outline"}
-                size={33}
+                size={36}
+                radius={8}
               >
                 <IconLogout />
               </ActionIcon>
             </Group>
+            <Burger
+              lineSize={1}
+              size={22}
+              opened={burgerOpened}
+              onClick={burgerToggle}
+              hiddenFrom="sm"
+            />
           </Box>
         </Group>
       </Stack>

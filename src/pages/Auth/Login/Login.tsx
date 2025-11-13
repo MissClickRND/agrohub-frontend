@@ -1,7 +1,7 @@
 import { Box, Stack, Text, Image, Center } from "@mantine/core";
 import LoginForm from "../../../features/auth/ui/LoginForm";
 
-export default function email() {
+export default function Login() {
   return (
     <Stack>
       <Center>

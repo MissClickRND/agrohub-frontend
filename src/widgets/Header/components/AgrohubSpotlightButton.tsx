@@ -11,11 +11,12 @@ function AgrohubSpotlightButton({ onClick }: Props) {
   return (
     <Button
       onClick={onClick}
-      w={300}
+      w={400}
+      radius={8}
       style={{ cursor: "text", borderColor: "var(--white-gray)" }}
       variant={"outline"}
-      justify={"start"}
-      leftSection={<IconSearch color={theme.colors.primary[7]} />}
+      justify={"space-between"}
+      rightSection={<IconSearch color={theme.colors.primary[7]} />}
     >
       <Text c={"gray"} fw={"500"} fz={14}>
         Навигация...
