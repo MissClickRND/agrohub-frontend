@@ -26,8 +26,8 @@ const Fields = () => {
   };
 
   return (
-    <Box h="100vh">
-      <Grid gutter={0} h="100%" styles={{ inner: { height: "100%" } }}>
+    <Box h="93vh">
+      <Grid gutter={0} h="100%">
         <Grid.Col
           style={{ borderRight: "1px solid var(--white-gray)" }}
           span={{ base: 12, sm: "content" }}

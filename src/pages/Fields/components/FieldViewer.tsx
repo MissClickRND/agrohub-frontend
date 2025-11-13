@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text, ScrollArea, Stack } from "@mantine/core";
+import { Box, Button, Flex, Text, ScrollArea, Stack, em } from "@mantine/core";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { Field, Zone } from "../../../features/Map/model/types";
 import {
@@ -8,6 +8,7 @@ import {
 import { useGetZones } from "../../../features/Map/model/lib/hooks/useGetZones";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import ZoneTemplate from "./ZoneTemplate";
+import { useMediaQuery } from "@mantine/hooks";
 
 export type FieldViewerHandle = {
   startFieldDrawing: () => void;
@@ -38,6 +39,7 @@ const FieldViewer = forwardRef<
     const mapRef = useRef<AgroHubMapHandle>(null);
     const { zones } = useGetZones(selectedFieldId);
     const selectedField = fields.find((f) => f.id === selectedFieldId);
+    const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
 
     useImperativeHandle(
       ref,
@@ -50,7 +52,7 @@ const FieldViewer = forwardRef<
     );
 
     return (
-      <Box h="100vh">
+      <Box h="100%">
         <Box h="100%" bdrs={8} w="100%">
           {selectedField ? (
             <Flex
@@ -91,13 +93,13 @@ const FieldViewer = forwardRef<
           )}
 
           <Flex
+            h="100%"
             flex={1}
-            h={"calc(100% - 78.5px)"}
             gap={20}
             direction={{ base: "column", lg: "row" }}
           >
             <Box
-              h={"100%"}
+              h={isMobile ? "460px" : "100%"}
               w={{ base: "100%", lg: selectedFieldId ? "80%" : "100%" }}
             >
               <AgroHubMap
@@ -126,7 +128,11 @@ const FieldViewer = forwardRef<
                 >
                   Зоны поля
                 </Text>
-                <ScrollArea h={"calc(100% - 60px)"} p={12}>
+                <ScrollArea
+                  h={"calc(100% - 60px)"}
+                  style={{ overflow: "hidden" }}
+                  p={12}
+                >
                   <Stack gap={8}>
                     {zones.length === 0 && (
                       <Text c="dimmed" px={4}>

@@ -1,5 +1,6 @@
 import {
   Box,
+  em,
   Loader,
   LoadingOverlay,
   ScrollArea,
@@ -9,6 +10,7 @@ import {
 
 import SelectFieldTemplate from "./component/SelectFieldTemplate";
 import { Field } from "../../features/Map/model/types";
+import { useMediaQuery } from "@mantine/hooks";
 
 export default function SelectFieldsManager({
   data,
@@ -21,6 +23,7 @@ export default function SelectFieldsManager({
   selectedFieldId?: number;
   onFieldSelect: (id?: number) => void;
 }) {
+  const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
   return (
     <Box
       p={12}
@@ -31,7 +34,7 @@ export default function SelectFieldsManager({
       <Text fw={500} fz={18} mb={8}>
         Поля
       </Text>
-      <ScrollArea scrollbarSize={6}>
+      <ScrollArea scrollbarSize={6} h={isMobile ? "200px" : "auto"}>
         <Stack gap={8} pos="relative">
           {isLoading && (
             <LoadingOverlay visible>
