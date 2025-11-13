@@ -92,8 +92,8 @@ export default function CreateCultureModal({
         })}
       >
         <Select
-          label="Название"
-          placeholder="Например, Пшеница"
+          label="Культура"
+          placeholder="Выберите культуру которая будет расти"
           key={form.key("text")}
           {...form.getInputProps("text")}
           data={cultures.map((culture) => ({

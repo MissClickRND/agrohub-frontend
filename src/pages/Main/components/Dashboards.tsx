@@ -9,6 +9,7 @@ import {
   ThemeIcon,
   Flex,
   useMantineTheme,
+  em,
 } from "@mantine/core";
 import {
   LineChart,
@@ -27,6 +28,7 @@ import {
   IconTrendingUp,
   IconPlaystationCircle,
 } from "@tabler/icons-react";
+import { useMediaQuery } from "@mantine/hooks";
 
 const mockData = {
   summary: {
@@ -86,7 +88,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const Dashboards = () => {
   const theme = useMantineTheme();
-
+  const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
   return (
     <Stack>
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
@@ -169,7 +171,7 @@ const Dashboards = () => {
             p="lg"
             radius="md"
             withBorder
-            style={{ height: "400px" }}
+            style={{ minHeight: "400px", overflow: "visible" }}
           >
             <Group mb="md" gap={4} align="center">
               <IconPlant size={24} style={{ color: "var(--main-color)" }} />
@@ -178,14 +180,24 @@ const Dashboards = () => {
               </Text>
             </Group>
 
-            <Group
+            <Flex
               align="center"
+              direction={isMobile ? "column" : "row"}
               justify="center"
               gap="xl"
-              wrap="nowrap"
-              style={{ height: "320px" }}
+              style={{
+                height: isMobile ? "auto" : "320px",
+                minHeight: isMobile ? "500px" : "320px",
+              }}
             >
-              <Flex justify="center" style={{ flex: 1 }}>
+              <Flex
+                justify="center"
+                style={{
+                  flex: isMobile ? "0 0 auto" : 1,
+                  height: isMobile ? "200px" : "auto",
+                  width: isMobile ? "100%" : "auto",
+                }}
+              >
                 <PieChart
                   labelsPosition="outside"
                   labelsType="percent"
@@ -196,7 +208,14 @@ const Dashboards = () => {
                 />
               </Flex>
 
-              <Stack gap="md" style={{ flex: 2 }} visibleFrom="sm">
+              {/* Список */}
+              <Stack
+                gap="md"
+                style={{
+                  flex: isMobile ? "0 0 auto" : 2,
+                  width: isMobile ? "100%" : "auto",
+                }}
+              >
                 <Text size="sm" fw={600}>
                   Распределение по убыванию:
                 </Text>
@@ -204,8 +223,8 @@ const Dashboards = () => {
                   .sort((a, b) => b.value - a.value)
                   .map((crop, index) => (
                     <div key={index}>
-                      <Group justify="space-between" mb={4}>
-                        <Group gap="xs">
+                      <Group justify="space-between" mb={4} wrap="nowrap">
+                        <Group gap="xs" style={{ minWidth: 0 }}>
                           <div
                             style={{
                               width: 12,
@@ -213,13 +232,22 @@ const Dashboards = () => {
                               backgroundColor: crop.color,
                               opacity: 0.8 - index * 0.12,
                               borderRadius: "2px",
+                              flexShrink: 0,
                             }}
                           />
-                          <Text size="sm" fw={500}>
+                          <Text
+                            size="sm"
+                            fw={500}
+                            style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
                             {crop.name}
                           </Text>
                         </Group>
-                        <Text size="sm" fw={600}>
+                        <Text size="sm" fw={600} style={{ flexShrink: 0 }}>
                           {(
                             (crop.value /
                               mockData.crops.reduce(
@@ -259,7 +287,7 @@ const Dashboards = () => {
                     </div>
                   ))}
               </Stack>
-            </Group>
+            </Flex>
           </Card>
         </Grid.Col>
       </Grid>
