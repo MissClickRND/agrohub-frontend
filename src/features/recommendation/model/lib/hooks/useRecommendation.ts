@@ -1,21 +1,21 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
-
 import { recommendation } from "../api";
-import { IRecommendationRequest } from "../type";
+import type { IRecommendationRequest } from "../type";
 
 export const useRecommendation = () => {
-  const { showError, showSuccess } = useNotifications();
+  const { showError } = useNotifications();
 
-  const mutation = useMutation({
-    mutationFn: (body: IRecommendationRequest) => recommendation(body),
-    onError: (error: Error) => {
-      showError(error.message || "Ошибка создания рекомендаций");
+  const mutation = useMutation<any, Error, IRecommendationRequest>({
+    mutationFn: (body) => recommendation(body),
+    onError: (error) => {
+      showError(error.message || "Ошибка получения рекомендаций");
     },
   });
 
   return {
-    recommendation: mutation.mutate,
+    recommend: mutation.mutate,
+    recommendAsync: mutation.mutateAsync,
     isLoading: mutation.isPending,
     isError: mutation.isError,
     error: mutation.error?.message || null,

@@ -1,28 +1,39 @@
-﻿// GroundsTable.tsx
-import { useEffect, useMemo, useState } from "react";
-import { ActionIcon, Badge, Flex, Group, Text } from "@mantine/core";
+﻿import { useEffect, useMemo, useState, useCallback } from "react";
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Flex,
+  Group,
+  Loader,
+  Modal,
+  Text,
+} from "@mantine/core";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import dayjs from "dayjs";
 import {
   IconArrowDown,
   IconArrowUp,
-  IconCircle,
-  IconDroplet,
-  IconLeaf,
-  IconLeaf2,
   IconMinus,
   IconTrash,
-  IconWaterpolo,
 } from "@tabler/icons-react";
 import classes from "../classes/GroundTable.module.css";
 import { useGetGroundData } from "../../../features/grounds/model/lib/hooks/useGetGroundData";
 import ModalAcceptAction from "../../../widgets/ModalAcceptAction/ModalAcceptAction";
 import { useDisclosure } from "@mantine/hooks";
 import { useDeleteGroundData } from "../../../features/grounds/model/lib/hooks/useDeleteGroundData";
+import {
+  useGetCultureLogs,
+  type CultureLog,
+} from "../../../features/GanttDiagram/model/lib/hooks/useGetCultureLogs";
+import { useRecommendation } from "../../../features/recommendation/model/lib/hooks/useRecommendation";
+import type { IRecommendationRequest } from "../../../features/recommendation/model/type";
 
+// ---------- Типы твоей модели ----------
 export type GeoPolygon =
-  | { type: "Polygon"; coordinates: number[][][] }
-  | { type: "MultiPolygon"; coordinates: number[][][][] };
+  | { type: "Polygon"; coordinates: number[][][] } // [[[lng,lat], ...]]
+  | { type: "MultiPolygon"; coordinates: number[][][][] }; //
+
 export type Zone = {
   id?: number;
   name: string;
@@ -31,6 +42,7 @@ export type Zone = {
   soil?: string;
   area?: number;
 };
+
 export type Field = {
   id?: number;
   name: string;
@@ -90,7 +102,7 @@ type ZoneRow = {
     rainfall?: number;
   };
   allMeasurements: Array<{
-    id: number; // ← добавили
+    id: number;
     date: string;
     N: number;
     P: number;
@@ -106,6 +118,7 @@ type ZoneRow = {
 type XY = { x: number; y: number };
 type LngLat = { lng: number; lat: number };
 
+// ---------- утилиты для мини-карты ----------
 const extractRings = (
   geometry?: GeoPolygon
 ): Array<Array<[number, number]>> => {
@@ -193,7 +206,6 @@ const MiniZonePreview = ({
           background: "#fff",
         }}
       >
-        {/* полигоны/кольца */}
         {rings.map((ring, idx) => {
           const pts = ring.map(([lng, lat]) =>
             project(lng, lat, bounds, width, height, padding)
@@ -210,7 +222,6 @@ const MiniZonePreview = ({
           );
         })}
 
-        {/* точки измерений */}
         {points.map((p, idx) => {
           const { x, y } = project(
             p.lng,
@@ -229,7 +240,6 @@ const MiniZonePreview = ({
   );
 };
 
-// ---------- рекомендации/тренды ----------
 const getTrendIcon = (current?: number, previous?: number) => {
   if (current === undefined || previous === undefined) return null;
   if (current > previous)
@@ -239,62 +249,44 @@ const getTrendIcon = (current?: number, previous?: number) => {
   return <IconMinus size={14} color="gray" style={{ marginLeft: 4 }} />;
 };
 
-const getRecommendationBadges = (m?: ZoneRow["latest"]) => {
-  if (!m) return <Text ta="center">Нет</Text>;
-  const badges = [];
-  if (m.ph < 6.0)
-    badges.push(
-      <Badge key="liming" color="gray" leftSection={<IconCircle size={14} />}>
-        Известкование
-      </Badge>
-    );
-  if (m.N < 20)
-    badges.push(
-      <Badge
-        key="nitrogen"
-        color="blue"
-        leftSection={<IconDroplet size={14} />}
-      >
-        Удобрение N
-      </Badge>
-    );
-  if (m.P < 15)
-    badges.push(
-      <Badge
-        key="phosphorus"
-        color="violet"
-        leftSection={<IconLeaf2 size={14} />}
-      >
-        Удобрение P
-      </Badge>
-    );
-  if (m.K < 20)
-    badges.push(
-      <Badge
-        key="potassium"
-        color="orange"
-        leftSection={<IconLeaf size={14} />}
-      >
-        Удобрение K
-      </Badge>
-    );
-  if (m.humidity < 15 || m.rainfall < 5)
-    badges.push(
-      <Badge
-        key="watering"
-        color="cyan"
-        leftSection={<IconWaterpolo size={14} />}
-      >
-        Полив
-      </Badge>
-    );
-  return badges.length ? (
-    <Group gap={4} justify="center">
-      {badges}
-    </Group>
-  ) : (
-    <Text ta="center">Нет</Text>
-  );
+const cropNameDict: Record<string, string> = {
+  wheat: "Пшеница",
+  barley: "Ячмень",
+  corn: "Кукуруза",
+  oat: "Овес",
+  pea: "Горох",
+  sunflower: "Подсолнечник",
+  soybean: "Соя",
+  potato: "Картофель",
+  rapeseed: "Рапс",
+  sugarbeet: "Сахарная свекла",
+};
+
+const normalizeCropKey = (name: string) =>
+  name.trim().toLowerCase().replace(/\s+/g, "");
+
+const translateCropName = (name: string) => {
+  const key = normalizeCropKey(name);
+  return cropNameDict[key] ?? name;
+};
+
+const extractTopCrops = (resp: any): string[] => {
+  if (!resp) return [];
+
+  // на случай axios: resp.data
+  const obj = resp.data ?? resp;
+
+  if (Array.isArray(obj)) {
+    // ответ вида ["Wheat", "Barley", ...]
+    return obj as string[];
+  }
+
+  if (Array.isArray(obj.top_crops)) {
+    // ответ вида { top_crops: [...] }
+    return obj.top_crops as string[];
+  }
+
+  return [];
 };
 
 const normalizeRows = (
@@ -386,44 +378,132 @@ export default function GroundsTable({
 }) {
   const { deleteGroundData } = useDeleteGroundData();
   const { groundData, isLoading } = useGetGroundData(fieldId);
+
+  const { cultureLogs } = useGetCultureLogs(fieldId);
+
+  const { recommendAsync } = useRecommendation();
+
   const [rows, setRows] = useState<ZoneRow[]>([]);
 
   const [toDeleteId, setToDeleteId] = useState<number | null>(null);
-  const [opened, { open, close }] = useDisclosure(false);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
+
+  // модалка рекомендаций
+  const [recModalOpened, { open: openRecModal, close: closeRecModal }] =
+    useDisclosure(false);
+  const [selectedZone, setSelectedZone] = useState<ZoneRow | null>(null);
+  const [currentRecommendations, setCurrentRecommendations] = useState<
+    string[] | null
+  >(null);
+  const [recError, setRecError] = useState<string | null>(null);
+  const [recLoading, setRecLoading] = useState(false);
 
   const selectedField = useMemo(
     () => fields?.find((f) => f.id === fieldId),
     [fields, fieldId]
   );
 
+  // нормализуем строки при изменении данных
   useEffect(() => {
     setRows(normalizeRows(selectedField, groundData as BackendField | null));
   }, [selectedField, groundData]);
 
+  // считаем последнюю культуру и её длительность в месяцах
+  const lastCropInfo = useMemo(() => {
+    if (!cultureLogs || cultureLogs.length === 0) return null;
+
+    const tasks = (cultureLogs as CultureLog[]).filter(
+      (log) => log.type === "task" && log.start && log.end
+    );
+    if (!tasks.length) return null;
+
+    const lastTask = tasks.reduce((acc, cur) =>
+      dayjs(cur.end as string).isAfter(dayjs(acc.end as string)) ? cur : acc
+    );
+
+    const start = dayjs(lastTask.start as string);
+    const end = dayjs(lastTask.end as string);
+
+    const days = Math.max(0, end.diff(start, "day"));
+    const months = Math.max(1, Math.round(days / 30));
+
+    return {
+      lastCropName: lastTask.text,
+      lastCropDurationMonths: months,
+    };
+  }, [cultureLogs]);
+
   const handleDelete = async () => {
     if (toDeleteId == null) return;
-    await deleteGroundData(toDeleteId); // предполагаем сигнатуру deleteGroundData(id: number)
-    // await refetch(); // если нужно подтянуть обновления после удаления
+    await deleteGroundData(toDeleteId);
     setToDeleteId(null);
-    close();
+    closeDeleteModal();
   };
+
+  const handleOpenRecommendation = useCallback(
+    async (row: ZoneRow) => {
+      setSelectedZone(row);
+      setCurrentRecommendations(null);
+      setRecError(null);
+      setRecLoading(false);
+      openRecModal();
+
+      if (!row.latest) {
+        setRecError("Нет последних данных по почве для этой зоны.");
+        return;
+      }
+
+      if (!lastCropInfo) {
+        setRecError("Нет данных по последним культурам для этого поля.");
+        return;
+      }
+
+      const m = row.latest;
+      const body: IRecommendationRequest = {
+        duration_months: 0, // по ТЗ всегда 0
+        N: m.N,
+        P: m.P,
+        K: m.K,
+        temperature: m.temperature,
+        humidity: m.humidity,
+        ph: m.ph,
+        rainfall: m.rainfall,
+        last_crop_duration: lastCropInfo.lastCropDurationMonths,
+        last_crop: lastCropInfo.lastCropName,
+      };
+
+      try {
+        setRecLoading(true);
+        const resp = await recommendAsync(body);
+        const crops = extractTopCrops(resp);
+        setCurrentRecommendations(crops);
+      } catch (e: any) {
+        setRecError(e?.message || "Ошибка получения рекомендаций.");
+      } finally {
+        setRecLoading(false);
+      }
+    },
+    [lastCropInfo, recommendAsync, openRecModal]
+  );
 
   const columns = useMemo<MRT_ColumnDef<ZoneRow>[]>(
     () => [
       {
         id: "mini",
         header: "Миниатюра",
-        accessorFn: (row) => row.geometry, // чтобы сортировка/фильтр не падали
+        accessorFn: (row) => row.geometry,
         Cell: ({ row }) => (
           <MiniZonePreview
             geometry={row.original.geometry}
             points={row.original.measurePoints}
-            // можно прокинуть цвет зоны в stroke/fill при желании:
             stroke={row.original.color || "#2f7e2f"}
             fill={
               (row.original.color && `${row.original.color}26`) ||
               "rgba(46, 204, 113, 0.15)"
-            } // 0x26 ≈ 15% alpha
+            }
           />
         ),
       },
@@ -470,16 +550,13 @@ export default function GroundsTable({
               }}
             >
               <span>
-                {" "}
-                N: {m.N} {getTrendIcon(m.N, prev?.N)}{" "}
+                N: {m.N} {getTrendIcon(m.N, prev?.N)}
               </span>
               <span>
-                {" "}
-                P: {m.P} {getTrendIcon(m.P, prev?.P)}{" "}
+                P: {m.P} {getTrendIcon(m.P, prev?.P)}
               </span>
               <span>
-                {" "}
-                K: {m.K} {getTrendIcon(m.K, prev?.K)}{" "}
+                K: {m.K} {getTrendIcon(m.K, prev?.K)}
               </span>
             </div>
           );
@@ -551,172 +628,243 @@ export default function GroundsTable({
       },
       {
         id: "recommendation",
-        header: "Реком.",
-        accessorFn: (row) => row.latest,
-        Cell: ({ row }) => getRecommendationBadges(row.original.latest),
+        header: "Рекомендации",
+        Cell: ({ row }) => (
+          <Button
+            variant="light"
+            size="xs"
+            onClick={() => handleOpenRecommendation(row.original)}
+          >
+            Посмотреть
+          </Button>
+        ),
       },
     ],
-    []
+    [handleOpenRecommendation]
   );
 
   return (
-    <MantineReactTable
-      columns={columns}
-      data={rows}
-      state={{ showProgressBars: isLoading }}
-      mantineTableHeadCellProps={{
-        style: {
-          padding: "5px",
-          height: 32,
-          textAlign: "center",
-          whiteSpace: "nowrap",
-          justifyContent: "center",
-        },
-      }}
-      mantineTableBodyCellProps={{
-        style: {
-          padding: "5px 0 5px 0",
-          textAlign: "center",
-          verticalAlign: "middle",
-        },
-      }}
-      enablePagination={false}
-      enableBottomToolbar={false}
-      enableTopToolbar={false}
-      mantineTableContainerProps={{
-        style: { height: "calc(100vh - 140px)", overflow: "auto" },
-      }}
-      mantinePaperProps={{ withBorder: false, style: { height: "100%" } }}
-      mantineTableProps={{
-        highlightOnHover: true,
-        striped: "even",
-        withColumnBorders: false,
-        withRowBorders: false,
-      }}
-      enableExpanding
-      renderDetailPanel={({ row }) => {
-        const all = row.original.allMeasurements ?? [];
-        return (
-          <div style={{ padding: 12, width: "100%" }}>
-            <Text fw={600} mb={8} ta="center">
-              Все измерения зоны «{row.original.zoneName}»
-            </Text>
-            <MiniZonePreview
-              geometry={row.original.geometry}
-              points={row.original.measurePoints}
-              stroke={row.original.color || "#2f7e2f"}
-              fill={
-                (row.original.color && `${row.original.color}26`) ||
-                "rgba(46, 204, 113, 0.1)"
-              }
-              width={320}
-              height={200}
-              padding={10}
-            />
-            <table
-              className={classes.MiniTable}
-              style={{ width: "100%", marginTop: 12 }}
-            >
-              <thead>
-                <tr>
-                  {[
-                    "Дата",
-                    "N",
-                    "P",
-                    "K",
-                    "Температура",
-                    "Влажность",
-                    "pH",
-                    "Осадки",
-                    "Координаты",
-                    "Рекомендация",
-                    "",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        borderBottom: "1px solid #ccc",
-                        padding: 6,
-                        textAlign: "center",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {all.length === 0 ? (
+    <>
+      <MantineReactTable
+        columns={columns}
+        data={rows}
+        state={{ showProgressBars: isLoading }}
+        mantineTableHeadCellProps={{
+          style: {
+            padding: "5px",
+            height: 32,
+            textAlign: "center",
+            whiteSpace: "nowrap",
+            justifyContent: "center",
+          },
+        }}
+        mantineTableBodyCellProps={{
+          style: {
+            padding: "5px 0 5px 0",
+            textAlign: "center",
+            verticalAlign: "middle",
+          },
+        }}
+        enablePagination={false}
+        enableBottomToolbar={false}
+        enableTopToolbar={false}
+        mantineTableContainerProps={{
+          style: { height: "calc(100vh - 140px)", overflow: "auto" },
+        }}
+        mantinePaperProps={{ withBorder: false, style: { height: "100%" } }}
+        mantineTableProps={{
+          highlightOnHover: true,
+          striped: "even",
+          withColumnBorders: false,
+          withRowBorders: false,
+        }}
+        enableExpanding
+        renderDetailPanel={({ row }) => {
+          const all = row.original.allMeasurements ?? [];
+          return (
+            <div style={{ padding: 12, width: "100%" }}>
+              <Text fw={600} mb={8} ta="center">
+                Все измерения зоны «{row.original.zoneName}»
+              </Text>
+              <MiniZonePreview
+                geometry={row.original.geometry}
+                points={row.original.measurePoints}
+                stroke={row.original.color || "#2f7e2f"}
+                fill={
+                  (row.original.color && `${row.original.color}26`) ||
+                  "rgba(46, 204, 113, 0.1)"
+                }
+                width={320}
+                height={200}
+                padding={10}
+              />
+              <table
+                className={classes.MiniTable}
+                style={{ width: "100%", marginTop: 12 }}
+              >
+                <thead>
                   <tr>
-                    <td
-                      colSpan={10}
-                      style={{ padding: 8, textAlign: "center" }}
-                    >
-                      Нет данных по измерениям
-                    </td>
+                    {[
+                      "Дата",
+                      "N",
+                      "P",
+                      "K",
+                      "Температура",
+                      "Влажность",
+                      "pH",
+                      "Осадки",
+                      "Координаты",
+                      "",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          borderBottom: "1px solid #ccc",
+                          padding: 6,
+                          textAlign: "center",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ) : (
-                  all.map((m, idx) => (
-                    <tr key={idx}>
-                      <td style={{ padding: 6, textAlign: "center" }}>
-                        {dayjs(m.date).format("DD.MM.YYYY")}
-                      </td>
-                      <td style={{ padding: 6, textAlign: "center" }}>{m.N}</td>
-                      <td style={{ padding: 6, textAlign: "center" }}>{m.P}</td>
-                      <td style={{ padding: 6, textAlign: "center" }}>{m.K}</td>
-                      <td style={{ padding: 6, textAlign: "center" }}>
-                        {m.temperature}
-                      </td>
-                      <td style={{ padding: 6, textAlign: "center" }}>
-                        {m.humidity}
-                      </td>
-                      <td style={{ padding: 6, textAlign: "center" }}>
-                        {m.ph}
-                      </td>
-                      <td style={{ padding: 6, textAlign: "center" }}>
-                        {m.rainfall}
-                      </td>
-                      <td style={{ padding: 6, textAlign: "center" }}>
-                        {m.coords
-                          ? `${m.coords.lat.toFixed(6)}, ${m.coords.lng.toFixed(
-                              6
-                            )}`
-                          : "—"}
-                      </td>
-                      <td style={{ padding: 6, justifyContent: "center" }}>
-                        {getRecommendationBadges(m)}
-                      </td>
-                      <td style={{ padding: 6 }}>
-                        <Flex justify="center">
-                          <ActionIcon
-                            color="red"
-                            onClick={() => {
-                              setToDeleteId(m.id);
-                              open();
-                            }}
-                          >
-                            <IconTrash />
-                          </ActionIcon>
-                        </Flex>
-                        <ModalAcceptAction
-                          text="Вы точно хотите удалить данные о почве?"
-                          close={() => {
-                            setToDeleteId(null);
-                            close();
-                          }}
-                          opened={opened}
-                          onPass={handleDelete}
-                        />
+                </thead>
+                <tbody>
+                  {all.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={10}
+                        style={{ padding: 8, textAlign: "center" }}
+                      >
+                        Нет данных по измерениям
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        );
-      }}
-    />
+                  ) : (
+                    all.map((m, idx) => (
+                      <tr key={idx}>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {dayjs(m.date).format("DD.MM.YYYY")}
+                        </td>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {m.N}
+                        </td>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {m.P}
+                        </td>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {m.K}
+                        </td>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {m.temperature}
+                        </td>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {m.humidity}
+                        </td>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {m.ph}
+                        </td>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {m.rainfall}
+                        </td>
+                        <td style={{ padding: 6, textAlign: "center" }}>
+                          {m.coords
+                            ? `${m.coords.lat.toFixed(
+                                6
+                              )}, ${m.coords.lng.toFixed(6)}`
+                            : "—"}
+                        </td>
+                        <td style={{ padding: 6 }}>
+                          <Flex justify="center">
+                            <ActionIcon
+                              color="red"
+                              onClick={() => {
+                                setToDeleteId(m.id);
+                                openDeleteModal();
+                              }}
+                            >
+                              <IconTrash />
+                            </ActionIcon>
+                          </Flex>
+                          <ModalAcceptAction
+                            text="Вы точно хотите удалить данные о почве?"
+                            close={() => {
+                              setToDeleteId(null);
+                              closeDeleteModal();
+                            }}
+                            opened={deleteModalOpened}
+                            onPass={handleDelete}
+                          />
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          );
+        }}
+      />
+
+      {/* Модалка с рекомендациями */}
+      <Modal
+        opened={recModalOpened}
+        onClose={() => {
+          closeRecModal();
+          setSelectedZone(null);
+          setCurrentRecommendations(null);
+          setRecError(null);
+          setRecLoading(false);
+        }}
+        title="Рекомендации по культуре"
+        centered
+      >
+        {!selectedZone ? (
+          <Text>Зона не выбрана.</Text>
+        ) : (
+          <>
+            <Text fw={600} mb="xs">
+              Зона: {selectedZone.zoneName}
+            </Text>
+
+            {lastCropInfo && (
+              <Text size="sm" c="dimmed" mb="sm">
+                Последняя культура: {lastCropInfo.lastCropName} (
+                {lastCropInfo.lastCropDurationMonths} мес.)
+              </Text>
+            )}
+
+            {recError && (
+              <Text c="red" mb="sm">
+                {recError}
+              </Text>
+            )}
+
+            {!recError && recLoading && (
+              <Flex justify="center" my="md">
+                <Loader />
+              </Flex>
+            )}
+
+            {!recError &&
+              !recLoading &&
+              currentRecommendations &&
+              (currentRecommendations.length ? (
+                <Group gap={8} justify="flex-start" mt="sm">
+                  {currentRecommendations.map((crop) => (
+                    <Badge key={crop} variant="light">
+                      {translateCropName(crop)}
+                    </Badge>
+                  ))}
+                </Group>
+              ) : (
+                <Text mt="sm">
+                  По данным не удалось сформировать рекомендации.
+                </Text>
+              ))}
+          </>
+        )}
+      </Modal>
+    </>
   );
 }

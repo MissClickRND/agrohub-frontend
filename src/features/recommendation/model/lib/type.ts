@@ -10,3 +10,7 @@ export type IRecommendationRequest = {
   last_crop_duration: number; // сколько росла последняя
   last_crop: string; // что росло последним
 };
+
+export type IRecommendationResponse = {
+  top_crops: string[];
+};

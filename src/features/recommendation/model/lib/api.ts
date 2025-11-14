@@ -17,4 +17,5 @@ export const recommendation = async (body: IRecommendationRequest) => {
   });
   if (res.status !== 200 && res.status !== 201)
     throw new Error("Ошибка получений рекомендаций");
+  return res.data;
 };

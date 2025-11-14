@@ -2,10 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
 import { getCultureLogs } from "../../api";
 
+export type CultureLog = {
+  id: number;
+  text: string;
+  type: "summary" | "task" | string;
+  start?: string;
+  end?: string;
+  parent?: number;
+};
+
 export const useGetCultureLogs = (id?: number) => {
   const { showError } = useNotifications();
 
-  const query = useQuery({
+  const query = useQuery<CultureLog[], Error>({
     queryKey: ["logs", id],
     queryFn: () => getCultureLogs(id as number),
     enabled: !!id,

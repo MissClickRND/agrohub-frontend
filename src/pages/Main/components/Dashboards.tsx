@@ -142,7 +142,7 @@ const Dashboards = () => {
         />
         <StatCard
           title="Средний показатель зон в одном поле"
-          value={dashboard.averageZone.toFixed(2)}
+          value={dashboard.averageZone?.toFixed(2)}
           icon={<IconTrendingUp size={32} />}
         />
       </SimpleGrid>
@@ -168,14 +168,14 @@ const Dashboards = () => {
               direction={isMobile ? "column" : "row"}
               gap="xl"
             >
-              {!dashboard.cultures || dashboard.cultures.length === 0 ? (
+              {!dashboard?.culture || dashboard?.culture.length === 0 ? (
                 <Text c="dimmed">Нет данных по культурам</Text>
               ) : (
                 <ResponsiveContainer width="50%" height={250}>
                   <RePieChart>
                     <Tooltip />
                     <Pie
-                      data={dashboard.cultures}
+                      data={dashboard?.culture}
                       dataKey="value"
                       nameKey="name"
                       label

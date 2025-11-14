@@ -1,10 +1,10 @@
-export const API = "http://158.160.24.86:4000";
-// export const API = "http://26.118.155.2:4000";
+export const API = "https://agrohub.miss-click.ru";
+// export const API = "http://158.160.24.86:4000";
 
 export const endpoints = {
   LOGIN: "/api/auth/login",
   REGISTER: "/api/auth/register",
-  USER_INFO: "/gate/me/profile",
+  USER_INFO: "/api/gate/me/profile",
   CHECK_ORGANIZATION: "/api/organization/my",
   CREATE_ORGANIZATION: "/api/organization/create",
 
