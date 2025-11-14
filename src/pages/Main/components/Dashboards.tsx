@@ -27,7 +27,13 @@ import {
   Bar,
 } from "recharts";
 
-import { IconPlant, IconMap, IconTrendingUp } from "@tabler/icons-react";
+import {
+  IconPlant,
+  IconMap,
+  IconTrendingUp,
+  IconCircuitGround,
+  IconShape,
+} from "@tabler/icons-react";
 
 import { useMediaQuery } from "@mantine/hooks";
 import { useGetDashboard } from "../../../features/dashboard/model/lib/hooks/useGetDashboard";
@@ -189,9 +195,13 @@ const Dashboards = () => {
             withBorder
             style={{ height: 400 }}
           >
-            <Group mb="md">
-              <Text fw={600} fz={18}>
-                NPK по зонам выбранного поля
+            <Group mb="md" gap={4} align="center">
+              <IconCircuitGround
+                size={24}
+                style={{ color: "var(--main-color)" }}
+              />
+              <Text size="lg" fw={500}>
+                Химический состав почвы (мг/кг)
               </Text>
             </Group>
 
@@ -229,9 +239,10 @@ const Dashboards = () => {
             withBorder
             style={{ height: 400 }}
           >
-            <Group mb="md">
-              <Text fw={600} fz={18}>
-                Площадь зон по полям (га, stacked)
+            <Group mb="md" gap={4} align="center">
+              <IconShape size={24} style={{ color: "var(--main-color)" }} />
+              <Text size="lg" fw={500}>
+                Распределение площади полей (га)
               </Text>
             </Group>
 
