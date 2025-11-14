@@ -1,5 +1,5 @@
-// export const API = "http://158.160.30.111:4000";
-export const API = "http://26.118.155.2:4000";
+export const API = "http://158.160.24.86:4000";
+// export const API = "http://26.118.155.2:4000";
 
 export const endpoints = {
   LOGIN: "/api/auth/login",
@@ -34,6 +34,10 @@ export const endpoints = {
   GET_DASHBOARD: "/api/dashboard/get",
   GET_NPK_DASHBOARD: (id: number) => `/api/dashboard/NPK/${id}`,
 
+  // чат
   SEND_MESSAGE: "/api/chat/completion",
   SEND_MESSAGE_STREAM: "/api/chat/completion-stream",
+
+  // рекомендации
+  RECOMMENDATION: "/api/recommendation/predict",
 };

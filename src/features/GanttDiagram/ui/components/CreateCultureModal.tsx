@@ -31,19 +31,22 @@ export default function CreateCultureModal({
   }) => Promise<void> | void;
 }) {
   const { cultures } = useGetCulture();
-  const { zones } = useGetZones(idField);
+  const { zones } = useGetZones(idField); // внутри хука обязательно: enabled: !!idField и обработка 404
+
   const [parents, setParents] = useState<{ value: string; label: string }[]>(
     []
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (zones) {
+    if (zones && Array.isArray(zones)) {
       const transformedParents = zones.map((zone: any) => ({
         value: zone.id.toString(),
         label: zone.name || `Зона ${zone.id}`,
       }));
       setParents(transformedParents);
+    } else {
+      setParents([]);
     }
   }, [zones]);
 
@@ -63,14 +66,16 @@ export default function CreateCultureModal({
     },
   });
 
+  const handleClose = () => {
+    setSubmitError(null);
+    form.reset();
+    onClose();
+  };
+
   return (
     <Modal
       opened={opened}
-      onClose={() => {
-        setSubmitError(null);
-        onClose();
-        form.reset();
-      }}
+      onClose={handleClose}
       title="Создание записи культуры"
       centered
       size="lg"
@@ -87,6 +92,7 @@ export default function CreateCultureModal({
             });
             form.reset();
           } catch (e) {
+            console.error(e);
             setSubmitError("Не удалось создать задачу. Повторите попытку.");
           }
         })}
@@ -96,7 +102,7 @@ export default function CreateCultureModal({
           placeholder="Выберите культуру которая будет расти"
           key={form.key("text")}
           {...form.getInputProps("text")}
-          data={cultures.map((culture) => ({
+          data={(cultures ?? []).map((culture) => ({
             value: String(culture.id),
             label: culture.name,
           }))}
@@ -143,7 +149,7 @@ export default function CreateCultureModal({
         )}
 
         <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={onClose} type="button">
+          <Button variant="default" onClick={handleClose} type="button">
             Отмена
           </Button>
           <Button loading={submitting} type="submit">

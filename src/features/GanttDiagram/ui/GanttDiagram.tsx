@@ -66,7 +66,6 @@ const normalizeTasks = (tasks: GanttTask[]): GanttTask[] => {
 
 export default function GanttDiagram({
   data,
-  isLoading,
   onCreateTask,
   onUpdateTask,
 }: {

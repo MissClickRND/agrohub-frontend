@@ -46,7 +46,6 @@ const LoginForm = () => {
           fullWidth
           size="md"
           color="var(--main-color)"
-          mb={100}
         >
           Войти
         </Button>
