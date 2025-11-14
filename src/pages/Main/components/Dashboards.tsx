@@ -102,7 +102,6 @@ const Dashboards = () => {
       const row: any = { field: field.name };
 
       field.zones?.forEach((zone: any) => {
-        // area приходит в м² → переводим в ГА и округляем
         row[zone.name] = Math.round(zone.area / 10000);
       });
 
@@ -153,7 +152,7 @@ const Dashboards = () => {
             p="lg"
             radius="md"
             withBorder
-            style={{ minHeight: "400px" }}
+            // убрали minHeight, чтобы карточка росла по контенту
           >
             <Group mb="md" gap={4} align="center">
               <IconPlant size={24} style={{ color: "var(--main-color)" }} />
@@ -162,32 +161,100 @@ const Dashboards = () => {
               </Text>
             </Group>
 
-            <Flex
-              align="center"
-              justify="center"
-              direction={isMobile ? "column" : "row"}
-              gap="xl"
-            >
-              {!dashboard?.culture || dashboard?.culture.length === 0 ? (
-                <Text c="dimmed">Нет данных по культурам</Text>
-              ) : (
-                <ResponsiveContainer width="50%" height={250}>
-                  <RePieChart>
-                    <Tooltip />
-                    <Pie
-                      data={dashboard?.culture}
-                      dataKey="value"
-                      nameKey="name"
-                      label
-                    />
-                  </RePieChart>
-                </ResponsiveContainer>
-              )}
-            </Flex>
+            {!dashboard?.culture || dashboard?.culture.length === 0 ? (
+              <Text c="dimmed">Нет данных по культурам</Text>
+            ) : (
+              <Flex
+                align={isMobile ? "stretch" : "flex-start"}
+                justify="space-between"
+                direction={isMobile ? "column" : "row"}
+                gap="xl"
+              >
+                {/* Левая часть — круговая диаграмма */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <ResponsiveContainer width="100%" height={260}>
+                    <RePieChart>
+                      <Tooltip />
+                      <Pie
+                        data={dashboard.culture}
+                        dataKey="value"
+                        nameKey="name"
+                        label
+                      />
+                    </RePieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Правая часть — список по убыванию */}
+                <Stack gap="md" style={{ flex: 1, minWidth: 0 }}>
+                  <Text size="sm" fw={600}>
+                    Распределение по убыванию:
+                  </Text>
+
+                  {[...dashboard.culture]
+                    .sort((a, b) => b.value - a.value)
+                    .map((crop, index) => {
+                      const total = dashboard.culture.reduce(
+                        (sum, item) => sum + item.value,
+                        0
+                      );
+                      const percent = total ? (crop.value / total) * 100 : 0;
+                      const opacity = Math.max(0.2, 0.9 - index * 0.1);
+
+                      return (
+                        <div key={crop.name + index}>
+                          <Group justify="space-between" mb={4}>
+                            <Group gap="xs">
+                              <div
+                                style={{
+                                  width: 12,
+                                  height: 12,
+                                  backgroundColor: crop.color,
+                                  opacity,
+                                  borderRadius: "2px",
+                                }}
+                              />
+                              <Text size="sm" fw={500}>
+                                {crop.name}
+                              </Text>
+                            </Group>
+                            <Text
+                              size="sm"
+                              fw={600}
+                              style={{ color: "var(--main-color)" }}
+                            >
+                              {percent.toFixed(0)}%
+                            </Text>
+                          </Group>
+
+                          <div
+                            style={{
+                              height: 6,
+                              backgroundColor: "#f1f3f5",
+                              borderRadius: 3,
+                              overflow: "hidden",
+                            }}
+                          >
+                            <div
+                              style={{
+                                height: "100%",
+                                width: `${percent.toFixed(0)}%`,
+                                backgroundColor: "var(--main-color)",
+                                opacity,
+                                borderRadius: 3,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                </Stack>
+              </Flex>
+            )}
           </Card>
         </Grid.Col>
 
-        <Grid.Col span={12}>
+        {/* <Grid.Col span={12}>
           <Card
             shadow="sm"
             p="lg"
@@ -229,7 +296,7 @@ const Dashboards = () => {
               </ResponsiveContainer>
             )}
           </Card>
-        </Grid.Col>
+        </Grid.Col> */}
 
         <Grid.Col span={12}>
           <Card

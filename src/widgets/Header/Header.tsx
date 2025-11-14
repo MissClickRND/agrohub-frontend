@@ -48,7 +48,7 @@ function Header({ burgerOpened, burgerToggle }: Props) {
           </Box>
           <Box>
             <Group gap={10}>
-              <Box
+              {/* <Box
                 visibleFrom={"sm"}
                 pr={10}
                 h={36}
@@ -61,7 +61,7 @@ function Header({ burgerOpened, burgerToggle }: Props) {
                     {userName}
                   </Text>
                 </Group>
-              </Box>
+              </Box> */}
 
               <ActionIcon
                 color={"red"}
