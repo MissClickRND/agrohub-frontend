@@ -100,6 +100,7 @@ const FieldViewer = forwardRef<
           >
             <Box
               h={isMobile ? "460px" : "100%"}
+              mih={isMobile ? "460px" : "700px"}
               w={{ base: "100%", lg: selectedFieldId ? "80%" : "100%" }}
             >
               <AgroHubMap

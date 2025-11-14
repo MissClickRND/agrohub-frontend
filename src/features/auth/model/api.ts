@@ -28,3 +28,19 @@ export const userInfo = async () => {
     throw new Error("Ошибка проверки пользователя");
   return res.data;
 };
+
+export const checkOrganization = async () => {
+  const res = await apiClient.get(API + endpoints.CHECK_ORGANIZATION);
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка проверки организации");
+  return res.data;
+};
+
+export const createOrganizations = async (name: string) => {
+  const res = await apiClient.put(API + endpoints.CREATE_ORGANIZATION, {
+    name: name,
+  });
+  if (res.status !== 200 && res.status !== 201)
+    throw new Error("Ошибка создания организации");
+  return res.data;
+};

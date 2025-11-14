@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
-import { userInfo } from "../../api";
+import { checkOrganization, createOrganizations, userInfo } from "../../api";
 import { useMeStore } from "../../../../../entities/me/model/meStore";
 
 export const useUserInfo = () => {
@@ -12,15 +12,15 @@ export const useUserInfo = () => {
     queryFn: async () => {
       try {
         const data = await userInfo();
+        const check = await checkOrganization();
         setUserName(data.user.username);
+
+        if (!check) {
+          createOrganizations(data.user.username);
+        }
 
         return data;
       } catch (error) {
-        showError(
-          error instanceof Error
-            ? error.message
-            : "Ошибка при подтверждении пользователя"
-        );
         throw error;
       }
     },

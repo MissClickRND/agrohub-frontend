@@ -10,7 +10,9 @@ import {
   Flex,
   useMantineTheme,
   em,
+  Select,
 } from "@mantine/core";
+
 import {
   LineChart,
   Line,
@@ -19,37 +21,32 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Pie,
+  PieChart as RePieChart,
+  BarChart,
+  Bar,
 } from "recharts";
-import { PieChart } from "@mantine/charts";
-import {
-  IconPlant,
-  IconMap,
-  IconChartBar,
-  IconTrendingUp,
-  IconPlaystationCircle,
-} from "@tabler/icons-react";
-import { useMediaQuery } from "@mantine/hooks";
 
-const mockData = {
-  summary: {
-    totalFields: 24,
-    totalZones: 156,
-    averageZonesPerField: 6.5,
-  },
-  chemistry: [
-    { type: "Фосфор PH", value: 120 },
-    { type: "Калий K", value: 12 },
-    { type: "Азот N", value: 85 },
-    { type: "Кальций Ca", value: 45 },
-    { type: "Магний Mg", value: 28 },
-  ],
-  crops: [
-    { name: "Кукуруза", value: 40, color: "red" },
-    { name: "Пшеница", value: 15, color: "yellow" },
-    { name: "Соя", value: 12, color: "green" },
-    { name: "Ячмень", value: 8, color: "brown" },
-    { name: "Другое", value: 5, color: "violet" },
-  ],
+import { IconPlant, IconMap, IconTrendingUp } from "@tabler/icons-react";
+
+import { useMediaQuery } from "@mantine/hooks";
+import { useGetDashboard } from "../../../features/dashboard/model/lib/hooks/useGetDashboard";
+import { useGetFields } from "../../../features/Map/model/lib/hooks/useGetFields";
+import { useGetNpkDashboard } from "../../../features/dashboard/model/lib/hooks/useGetNpkDashboard";
+
+import { useState, useMemo } from "react";
+import { colors } from "../../../features/dashboard/model/lib/types";
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <Paper shadow="sm" p="md" withBorder>
+        <Text fw={600}>{label}</Text>
+        <Text size="sm">Значение: {payload[0].value}</Text>
+      </Paper>
+    );
+  }
+  return null;
 };
 
 const StatCard = ({ title, value, icon }: any) => (
@@ -57,7 +54,7 @@ const StatCard = ({ title, value, icon }: any) => (
     <Flex justify="space-between">
       <Group>
         <div>
-          <Text size="sm" color="dimmed">
+          <Text size="sm" c="dimmed">
             {title}
           </Text>
           <Text fz={24} fw={700}>
@@ -72,106 +69,85 @@ const StatCard = ({ title, value, icon }: any) => (
   </Card>
 );
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <Paper shadow="sm" p="md" withBorder>
-        <Text>{label}</Text>
-        <Text size="sm" style={{ color: "var(--main-color)" }}>
-          Значение: {payload[0].value} мг/кг
-        </Text>
-      </Paper>
-    );
-  }
-  return null;
-};
-
 const Dashboards = () => {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
+
+  const [fieldId, setFieldId] = useState<number | null>(null);
+
+  const { dashboard } = useGetDashboard();
+  const { fields } = useGetFields();
+  const { dashboardNPK } = useGetNpkDashboard(fieldId);
+
+  const npkData = useMemo(() => {
+    if (!dashboardNPK) return [];
+    return dashboardNPK.map((item: any) => ({
+      zone: item.zone,
+      N: item.N,
+      P: item.P,
+      K: item.K,
+    }));
+  }, [dashboardNPK]);
+
+  const gaData = useMemo(() => {
+    if (!fields) return [];
+
+    return fields.map((field: any) => {
+      const row: any = { field: field.name };
+
+      field.zones?.forEach((zone: any) => {
+        // area приходит в м² → переводим в ГА и округляем
+        row[zone.name] = Math.round(zone.area / 10000);
+      });
+
+      return row;
+    });
+  }, [fields]);
+
+  const zoneKeys = useMemo(() => {
+    const keysSet = new Set<string>();
+    gaData.forEach((row: any) => {
+      Object.keys(row).forEach((key) => {
+        if (key !== "field") {
+          keysSet.add(key);
+        }
+      });
+    });
+    return Array.from(keysSet);
+  }, [gaData]);
+
+  const fieldOptions = fields?.map((f: any) => ({
+    value: String(f.id),
+    label: f.name,
+  }));
+
   return (
     <Stack>
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
         <StatCard
           title="Всего отслеживаемых полей"
-          value={mockData.summary.totalFields}
+          value={dashboard.countFields}
           icon={<IconMap size={32} />}
         />
         <StatCard
           title="Всего отслеживаемых зон"
-          value={mockData.summary.totalZones}
+          value={dashboard.countZones}
           icon={<IconPlant size={32} />}
         />
         <StatCard
           title="Средний показатель зон в одном поле"
-          value={mockData.summary.averageZonesPerField}
+          value={dashboard.averageZone}
           icon={<IconTrendingUp size={32} />}
         />
       </SimpleGrid>
-
       <Grid>
-        <Grid.Col span={{ base: 12, lg: 6 }}>
+        <Grid.Col span={{ base: 12, lg: 12 }}>
           <Card
             shadow="sm"
             p="lg"
             radius="md"
             withBorder
-            style={{ height: "400px" }}
-          >
-            <Flex justify="space-between" align="center" wrap="wrap" gap="md">
-              <Group gap={4} align="center">
-                <IconChartBar
-                  size={24}
-                  style={{ color: "var(--main-color)" }}
-                />
-                <Text size="lg" fw={500}>
-                  Химический состав почвы
-                </Text>
-              </Group>
-              <Flex gap={4} align="center">
-                <IconPlaystationCircle size={18} />
-                <Text fz={16} fw={500}>
-                  Значение (мг/кг)
-                </Text>
-              </Flex>
-            </Flex>
-            <ResponsiveContainer width="100%" height="90%">
-              <LineChart
-                data={mockData.chemistry}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="type"
-                  height={80}
-                  interval={0}
-                  angle={-45}
-                  textAnchor="end"
-                  fontSize={12}
-                />
-                <YAxis fontSize={12} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  name="Значение (мг/кг)"
-                  stroke="var(--main-color)"
-                  strokeWidth={3}
-                  dot={{ fill: "var(--main-color)", strokeWidth: 2, r: 6 }}
-                  activeDot={{ r: 8, fill: "var(--main-color)" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, lg: 6 }}>
-          <Card
-            shadow="sm"
-            p="lg"
-            radius="md"
-            withBorder
-            style={{ minHeight: "400px", overflow: "visible" }}
+            style={{ minHeight: "400px" }}
           >
             <Group mb="md" gap={4} align="center">
               <IconPlant size={24} style={{ color: "var(--main-color)" }} />
@@ -182,112 +158,105 @@ const Dashboards = () => {
 
             <Flex
               align="center"
-              direction={isMobile ? "column" : "row"}
               justify="center"
+              direction={isMobile ? "column" : "row"}
               gap="xl"
-              style={{
-                height: isMobile ? "auto" : "320px",
-                minHeight: isMobile ? "500px" : "320px",
-              }}
             >
-              <Flex
-                justify="center"
-                style={{
-                  flex: isMobile ? "0 0 auto" : 1,
-                  height: isMobile ? "200px" : "auto",
-                  width: isMobile ? "100%" : "auto",
-                }}
-              >
-                <PieChart
-                  labelsPosition="outside"
-                  labelsType="percent"
-                  withLabels
-                  data={mockData.crops}
-                  withTooltip
-                  tooltipDataSource="segment"
-                />
-              </Flex>
-
-              {/* Список */}
-              <Stack
-                gap="md"
-                style={{
-                  flex: isMobile ? "0 0 auto" : 2,
-                  width: isMobile ? "100%" : "auto",
-                }}
-              >
-                <Text size="sm" fw={600}>
-                  Распределение по убыванию:
-                </Text>
-                {[...mockData.crops]
-                  .sort((a, b) => b.value - a.value)
-                  .map((crop, index) => (
-                    <div key={index}>
-                      <Group justify="space-between" mb={4} wrap="nowrap">
-                        <Group gap="xs" style={{ minWidth: 0 }}>
-                          <div
-                            style={{
-                              width: 12,
-                              height: 12,
-                              backgroundColor: crop.color,
-                              opacity: 0.8 - index * 0.12,
-                              borderRadius: "2px",
-                              flexShrink: 0,
-                            }}
-                          />
-                          <Text
-                            size="sm"
-                            fw={500}
-                            style={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {crop.name}
-                          </Text>
-                        </Group>
-                        <Text size="sm" fw={600} style={{ flexShrink: 0 }}>
-                          {(
-                            (crop.value /
-                              mockData.crops.reduce(
-                                (sum, item) => sum + item.value,
-                                0
-                              )) *
-                            100
-                          ).toFixed(0)}
-                          %
-                        </Text>
-                      </Group>
-                      <div
-                        style={{
-                          height: 6,
-                          backgroundColor: "#f1f3f5",
-                          borderRadius: 3,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: "100%",
-                            width: `${(
-                              (crop.value /
-                                mockData.crops.reduce(
-                                  (sum, item) => sum + item.value,
-                                  0
-                                )) *
-                              100
-                            ).toFixed(0)}%`,
-                            backgroundColor: crop.color,
-                            opacity: 0.8 - index * 0.12,
-                            borderRadius: 3,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-              </Stack>
+              {!dashboard.cultures || dashboard.cultures.length === 0 ? (
+                <Text c="dimmed">Нет данных по культурам</Text>
+              ) : (
+                <ResponsiveContainer width="50%" height={250}>
+                  <RePieChart>
+                    <Tooltip />
+                    <Pie
+                      data={dashboard.cultures}
+                      dataKey="value"
+                      nameKey="name"
+                      label
+                    />
+                  </RePieChart>
+                </ResponsiveContainer>
+              )}
             </Flex>
+          </Card>
+        </Grid.Col>
+
+        <Grid.Col span={12}>
+          <Card
+            shadow="sm"
+            p="lg"
+            radius="md"
+            withBorder
+            style={{ height: 400 }}
+          >
+            <Group mb="md">
+              <Text fw={600} fz={18}>
+                NPK по зонам выбранного поля
+              </Text>
+            </Group>
+
+            <Select
+              placeholder="Выберите поле"
+              data={fieldOptions}
+              value={fieldId ? String(fieldId) : null}
+              onChange={(v) => setFieldId(v ? Number(v) : null)}
+              mb="md"
+            />
+
+            {npkData.length === 0 ? (
+              <Text c="dimmed">Нет данных по NPK</Text>
+            ) : (
+              <ResponsiveContainer width="100%" height="80%">
+                <BarChart data={npkData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="zone" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="N" name="Азот (N)" fill="#3b82f6" />
+                  <Bar dataKey="P" name="Фосфор (P)" fill="#10b981" />
+                  <Bar dataKey="K" name="Калий (K)" fill="#f97316" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </Card>
+        </Grid.Col>
+
+        <Grid.Col span={12}>
+          <Card
+            shadow="sm"
+            p="lg"
+            radius="md"
+            withBorder
+            style={{ height: 400 }}
+          >
+            <Group mb="md">
+              <Text fw={600} fz={18}>
+                Площадь зон по полям (га, stacked)
+              </Text>
+            </Group>
+
+            {gaData.length === 0 ? (
+              <Text c="dimmed">Нет данных по зонам</Text>
+            ) : (
+              <ResponsiveContainer width="100%" height="85%">
+                <BarChart data={gaData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="field" />
+                  <YAxis />
+                  <Tooltip />
+
+                  {zoneKeys.map((key, i) => (
+                    <Bar
+                      key={key}
+                      dataKey={key}
+                      stackId="zones"
+                      name={key}
+                      fill={colors[i] || "#DSDSD"}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </Card>
         </Grid.Col>
       </Grid>

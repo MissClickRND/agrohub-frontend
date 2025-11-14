@@ -39,8 +39,8 @@ function Header({ burgerOpened, burgerToggle }: Props) {
         <Group align={"center"} justify={"space-between"}>
           <Group align={"center"}>
             <Group gap={6} px={4}>
-              <img src="/icons/Logo.svg" style={{ width: "35px" }} />
-              <Text fw={600}>АгроХаб</Text>
+              <img src="/icons/MainLogo.svg" style={{ height: "36px" }} />
+              {/* <Text fw={600}>АгроХаб</Text> */}
             </Group>
           </Group>
           <Box visibleFrom={"sm"}>

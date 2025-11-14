@@ -1,22 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNotifications } from "../../../../../shared/lib/hooks/useNotifications";
-import { getZones } from "../../api";
+import { getNPKDashboard } from "../api";
 
-export const useGetZones = (id?: number) => {
+export const useGetNpkDashboard = (id: number | null) => {
   const { showError } = useNotifications();
 
   const query = useQuery({
-    queryKey: ["zones", id],
-    queryFn: () => getZones(id as number),
+    queryKey: ["dashboardNPK", id],
+    queryFn: () => getNPKDashboard(id as number),
     enabled: !!id,
   });
 
-  // if (query.isError && query.error) {
-  //   showError(query.error.message || "Ошибка получения зон поля");
-  // }
+  if (query.isError && query.error) {
+    showError(query.error.message || "Ошибка получения дашбордов NPK");
+  }
 
   return {
-    zones: query.data ?? [],
+    dashboardNPK: query.data ?? [],
     isLoading: query.isPending,
     isError: query.isError,
     error: query.error?.message || null,
