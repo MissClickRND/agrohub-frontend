@@ -10,12 +10,9 @@ import {
   Flex,
   useMantineTheme,
   em,
-  Select,
 } from "@mantine/core";
 
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -25,14 +22,13 @@ import {
   PieChart as RePieChart,
   BarChart,
   Bar,
-  Cell, // 👈 добавили
+  Cell,
 } from "recharts";
 
 import {
   IconPlant,
   IconMap,
   IconTrendingUp,
-  IconCircuitGround,
   IconShape,
 } from "@tabler/icons-react";
 
@@ -165,7 +161,6 @@ const Dashboards = () => {
                 direction={isMobile ? "column" : "row"}
                 gap="xl"
               >
-                {/* Левая часть — круговая диаграмма */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <ResponsiveContainer width="100%" height={260}>
                     <RePieChart>
@@ -179,7 +174,7 @@ const Dashboards = () => {
                         {dashboard.culture.map((entry: any, index: number) => (
                           <Cell
                             key={`cell-${entry.name}-${index}`}
-                            fill={entry.color} // 👈 берём цвет из бэка
+                            fill={entry.color}
                           />
                         ))}
                       </Pie>
@@ -187,7 +182,6 @@ const Dashboards = () => {
                   </ResponsiveContainer>
                 </div>
 
-                {/* Правая часть — список по убыванию */}
                 <Stack gap="md" style={{ flex: 1, minWidth: 0 }}>
                   <Text size="sm" fw={600}>
                     Распределение по убыванию:
@@ -211,7 +205,7 @@ const Dashboards = () => {
                                 style={{
                                   width: 12,
                                   height: 12,
-                                  backgroundColor: crop.color, // 👈 цвет из бэка
+                                  backgroundColor: crop.color,
                                   opacity,
                                   borderRadius: "2px",
                                 }}
@@ -241,7 +235,7 @@ const Dashboards = () => {
                               style={{
                                 height: "100%",
                                 width: `${percent.toFixed(0)}%`,
-                                backgroundColor: crop.color, // 👈 тоже цвет культуры
+                                backgroundColor: crop.color,
                                 opacity,
                                 borderRadius: 3,
                               }}
@@ -256,7 +250,7 @@ const Dashboards = () => {
           </Card>
         </Grid.Col>
 
-        {/* NPK можно раскомментировать, когда понадобится */}
+        {/* NPK, пока с багом */}
         {/* <Grid.Col span={12}>
           <Card
             shadow="sm"
