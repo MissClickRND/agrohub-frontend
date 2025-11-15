@@ -1,39 +1,23 @@
-import { Autocomplete, Flex, Stack, Text } from "@mantine/core";
-import { useGetFields } from "../../Map/model/lib/hooks/useGetFields";
-import { useState } from "react";
+import { Autocomplete, Flex, Loader, Stack, Text } from "@mantine/core";
 import { MapContainer, Polygon, Popup, TileLayer } from "react-leaflet";
-import { Field, Zone } from "../../Map/model/types";
-
-const cultures = ["wheat", "corn", "beans"];
+import { useCalculator } from "../model/lib/hooks/useCalculator";
 
 const converCoords = (coords: [number, number][][]): [number, number][][] =>
   coords.map((ring) => ring.map(([lng, lat]) => [lat, lng]));
 
 export const FieldPreview = () => {
-  const { fields } = useGetFields();
-  const [selectedField, setSelectedField] = useState<Field | null>(null);
-  const [selectedZone, setSelectedZone] = useState<Zone | Field | null>(null);
-  const [selectedCultures, setSelectedCultures] = useState<Record<
-    number | string,
-    string
-  > | null>(null);
+  const {fieldChangeHandler, selectedCultures, setCultureHandler, fields, isLoading, cultures, selectedField, selectedZone, setSelectedZone} = useCalculator()
   return (
     <Stack>
-      <Text fz={"h4"}>Выберите поле</Text>
       <Autocomplete
         data={fields?.map((field) => field.name)}
-        onChange={(value) => {
-          const newField = fields?.find((field) => field.name === value);
-          console.log(newField, value);
-          setSelectedField(newField ?? null);
-          setSelectedZone(null);
-          setSelectedCultures(null);
-        }}
+        onChange={fieldChangeHandler}
+        label="Выберите поле"
       />
       {selectedField && (
         <Stack>
           <MapContainer
-            style={{ height: "500px" }}
+            style={{ height: "500px", zIndex: 1, position: "relative" }}
             zoom={13}
             center={
               converCoords(selectedField.geometry.coordinates)[0][0] as [
@@ -61,18 +45,16 @@ export const FieldPreview = () => {
               }}
             >
               <Popup>
-                <Autocomplete
-                  comboboxProps={{ withinPortal: false }}
-                  w={"100px"}
-                  onChange={(value) => {
-                    if (cultures.includes(value) || value === "")
-                      setSelectedCultures({
-                        ...selectedCultures,
-                        main: value,
-                      });
-                  }}
-                  data={cultures}
-                />
+                {isLoading ? (
+                  <Loader />
+                ) : (
+                  <Autocomplete
+                    comboboxProps={{ withinPortal: false }}
+                    w={"100px"}
+                    onChange={setCultureHandler}
+                    data={cultures.map((cul) => String(cul.name))}
+                  />
+                )}
               </Popup>
             </Polygon>
             {selectedField.zones?.map((zone) => (
@@ -89,18 +71,16 @@ export const FieldPreview = () => {
                 positions={converCoords(zone.geometry.coordinates)[0]}
               >
                 <Popup>
-                  <Autocomplete
-                    comboboxProps={{ withinPortal: false }}
-                    w={"100px"}
-                    onChange={(value) => {
-                      if (cultures.includes(value) || value === "")
-                        setSelectedCultures({
-                          ...selectedCultures,
-                          [zone.id!]: value,
-                        });
-                    }}
-                    data={cultures}
-                  />
+                  {isLoading ? (
+                    <Loader />
+                  ) : (
+                    <Autocomplete
+                      comboboxProps={{ withinPortal: false }}
+                      w={"100px"}
+                      onChange={(value) => setCultureHandler(value, String(zone.id))}
+                      data={cultures.map((cul) => String(cul.name))}
+                    />
+                  )}
                 </Popup>
               </Polygon>
             ))}
@@ -121,17 +101,17 @@ export const FieldPreview = () => {
                             : "Зона номер " + key + ":"}
                         </Text>
                         <Text>
-                          {selectedCultures[key === "main" ? key : Number(key)]}
+                          {selectedCultures[key === "main" ? key : Number(key)].name}
                         </Text>
                       </Flex>
                       <Text>
                         {Math.round(
-                          key === "main"
+                          (key === "main"
                             ? selectedField.area!
                             : selectedField.zones!.find(
                                 (zone) => zone.id === Number(key)
                               )!.area!
-                        ) / 10000}{" "}
+                         )/ 100) / 100}{" "}
                         Га
                       </Text>
                     </>

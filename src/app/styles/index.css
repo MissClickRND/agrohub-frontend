@@ -8,6 +8,10 @@ body {
   height: 100%;
 }
 
+.leaflet-control-attribution a {
+  display: none;
+}
+
 :root {
   /* --main-color: #43c03d; */
   --main-color: #3aaa35;

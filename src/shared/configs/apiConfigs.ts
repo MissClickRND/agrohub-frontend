@@ -1,5 +1,5 @@
-// export const API = "http://158.160.30.111:4000";
-export const API = "http://26.118.155.2:4000";
+export const API = "http://158.160.24.86:4000";
+// export const API = "http://26.118.155.2:4000";
 
 export const endpoints = {
   LOGIN: "/api/auth/login",
@@ -36,4 +36,6 @@ export const endpoints = {
 
   SEND_MESSAGE: "/api/chat/completion",
   SEND_MESSAGE_STREAM: "/api/chat/completion-stream",
+
+  CALCULATE: "/api/calculator/economics",
 };
