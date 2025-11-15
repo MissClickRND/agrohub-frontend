@@ -138,7 +138,7 @@ const Dashboards = () => {
         />
         <StatCard
           title="Средний показатель зон в одном поле"
-          value={dashboard.averageZone?.toFixed(2)}
+          value={dashboard.averageZone?.toFixed(2) ?? 0}
           icon={<IconTrendingUp size={32} />}
         />
       </SimpleGrid>

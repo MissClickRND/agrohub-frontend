@@ -1,4 +1,4 @@
-import { em, Flex } from "@mantine/core";
+import { em, Flex, Text } from "@mantine/core";
 import GanttDiagram from "../../features/GanttDiagram/ui/GanttDiagram";
 
 import { useEffect, useState } from "react";
@@ -28,10 +28,17 @@ export default function JournalCultures() {
         onFieldSelect={setSelectedFieldId}
       />
 
-      <GanttDiagram
-        isLoading={isLoading}
-        data={fields.find((el) => el.id === selectedFieldId)}
-      />
+      {fields.length > 0 && (
+        <GanttDiagram
+          isLoading={isLoading}
+          data={fields.find((el) => el.id === selectedFieldId)}
+        />
+      )}
+      {!fields.length && (
+        <Text ta="center" w="100%" py={50}>
+          Добавьте поля, что бы увидеть график
+        </Text>
+      )}
     </Flex>
   );
 }

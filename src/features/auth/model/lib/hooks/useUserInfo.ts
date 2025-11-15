@@ -3,6 +3,18 @@ import { useNotifications } from "../../../../../shared/lib/hooks/useNotificatio
 import { checkOrganization, createOrganizations, userInfo } from "../../api";
 import { useMeStore } from "../../../../../entities/me/model/meStore";
 
+function generateRandomString(length = 8) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  return result;
+}
+
 export const useUserInfo = () => {
   const { setUserName } = useMeStore();
   const { showError } = useNotifications();
@@ -11,15 +23,15 @@ export const useUserInfo = () => {
     queryKey: ["userInfo"],
     queryFn: async () => {
       try {
-        const data = await userInfo();
+        // const data = await userInfo();
         const check = await checkOrganization();
-        setUserName(data.user.username);
+        // setUserName(data.user.username);
 
         if (!check) {
-          createOrganizations(data.user.username);
+          createOrganizations(generateRandomString());
         }
 
-        return data;
+        // return data;
       } catch (error) {
         throw error;
       }
