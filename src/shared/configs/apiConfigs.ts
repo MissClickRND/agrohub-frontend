@@ -40,4 +40,5 @@ export const endpoints = {
 
   // рекомендации
   RECOMMENDATION: "/api/recommendation/predict",
+  CALCULATE: "/api/calculator/economics",
 };

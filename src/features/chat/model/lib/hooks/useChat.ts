@@ -99,7 +99,7 @@ export const useChat = () => {
       ]);
       newMessages.push({author: 'user', id: newMessages.length, content: currentMessage})
       const res = await sendMessage({
-        model: "llama3.2:latest",
+        model: "mistral:latest",
         prompt: currentMessage,
         fieldId: currentFieldId,
       });
