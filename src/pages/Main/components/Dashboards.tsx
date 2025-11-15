@@ -25,6 +25,7 @@ import {
   PieChart as RePieChart,
   BarChart,
   Bar,
+  Cell, // 👈 добавили
 } from "recharts";
 
 import {
@@ -147,13 +148,7 @@ const Dashboards = () => {
       </SimpleGrid>
       <Grid>
         <Grid.Col span={{ base: 12, lg: 12 }}>
-          <Card
-            shadow="sm"
-            p="lg"
-            radius="md"
-            withBorder
-            // убрали minHeight, чтобы карточка росла по контенту
-          >
+          <Card shadow="sm" p="lg" radius="md" withBorder>
             <Group mb="md" gap={4} align="center">
               <IconPlant size={24} style={{ color: "var(--main-color)" }} />
               <Text size="lg" fw={500}>
@@ -180,7 +175,14 @@ const Dashboards = () => {
                         dataKey="value"
                         nameKey="name"
                         label
-                      />
+                      >
+                        {dashboard.culture.map((entry: any, index: number) => (
+                          <Cell
+                            key={`cell-${entry.name}-${index}`}
+                            fill={entry.color} // 👈 берём цвет из бэка
+                          />
+                        ))}
+                      </Pie>
                     </RePieChart>
                   </ResponsiveContainer>
                 </div>
@@ -209,7 +211,7 @@ const Dashboards = () => {
                                 style={{
                                   width: 12,
                                   height: 12,
-                                  backgroundColor: crop.color,
+                                  backgroundColor: crop.color, // 👈 цвет из бэка
                                   opacity,
                                   borderRadius: "2px",
                                 }}
@@ -239,7 +241,7 @@ const Dashboards = () => {
                               style={{
                                 height: "100%",
                                 width: `${percent.toFixed(0)}%`,
-                                backgroundColor: "var(--main-color)",
+                                backgroundColor: crop.color, // 👈 тоже цвет культуры
                                 opacity,
                                 borderRadius: 3,
                               }}
@@ -254,6 +256,7 @@ const Dashboards = () => {
           </Card>
         </Grid.Col>
 
+        {/* NPK можно раскомментировать, когда понадобится */}
         {/* <Grid.Col span={12}>
           <Card
             shadow="sm"

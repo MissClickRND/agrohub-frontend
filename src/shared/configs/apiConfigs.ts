@@ -35,8 +35,8 @@ export const endpoints = {
   GET_NPK_DASHBOARD: (id: number) => `/api/dashboard/NPK/${id}`,
 
   // чат
-  SEND_MESSAGE: "/api/chat/completion",
-  SEND_MESSAGE_STREAM: "/api/chat/completion-stream",
+  SEND_MESSAGE: "/api/gpt/completion",
+  SEND_MESSAGE_STREAM: "/api/gpt/completion-stream",
 
   // рекомендации
   RECOMMENDATION: "/api/recommendation/predict",

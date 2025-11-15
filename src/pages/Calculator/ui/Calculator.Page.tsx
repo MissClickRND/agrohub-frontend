@@ -50,14 +50,16 @@ const cardsInfo = [
 
 export const CalculatorPage = () => {
   const theme = useMantineTheme();
-  const {resetSelected} = useCalculator()
-  const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null)
-  const [value, setValue] = useState<string | null>("1")
-  const [controlsRefs, setControlsRefs] = useState<Record<string, HTMLButtonElement | null>>({})
+  const { resetSelected } = useCalculator();
+  const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null);
+  const [value, setValue] = useState<string | null>("1");
+  const [controlsRefs, setControlsRefs] = useState<
+    Record<string, HTMLButtonElement | null>
+  >({});
   const setControlRef = (val: string) => (node: HTMLButtonElement) => {
     controlsRefs[val] = node;
-    setControlsRefs(controlsRefs)
-  }
+    setControlsRefs(controlsRefs);
+  };
   return (
     <Box p={"1rem"} w={"100%"} h={"100%"}>
       <Stack gap={"2rem"}>
@@ -84,48 +86,79 @@ export const CalculatorPage = () => {
               </Text>
             </Flex>
             <Grid gutter={"1rem"}>
-              <Grid.Col span={{bale: 12, md: 6}}>
-                <Tabs value={value} onChange={(value) => {resetSelected() ;setValue(value)}}>
-                  <Tabs.List ref={setRootRef} styles={{
-                    list: {
-                      position: "relative",
-                      marginBottom: "1rem"
-                    }
-                  }}>
-                    <Tabs.Tab styles={{tab: {fontWeight: 500, transition: "color 100ms ease", color: "var(--mantine-color-gray-7)"}}} value='1' ref={setControlRef("1")}>
+              <Grid.Col span={{ bale: 12, md: 6 }}>
+                <Tabs
+                  value={value}
+                  onChange={(value) => {
+                    resetSelected();
+                    setValue(value);
+                  }}
+                >
+                  <Tabs.List
+                    ref={setRootRef}
+                    styles={{
+                      list: {
+                        position: "relative",
+                        marginBottom: "1rem",
+                      },
+                    }}
+                  >
+                    <Tabs.Tab
+                      styles={{
+                        tab: {
+                          fontWeight: 500,
+                          transition: "color 100ms ease",
+                          color: "var(--mantine-color-gray-7)",
+                        },
+                      }}
+                      value="1"
+                      ref={setControlRef("1")}
+                    >
                       <Text>По полю</Text>
                     </Tabs.Tab>
-                    <Tabs.Tab styles={{tab: {fontWeight: 500, transition: "color 100ms ease", color: "var(--mantine-color-gray-7)"}}} value="2" ref={setControlRef("2")}>
+                    <Tabs.Tab
+                      styles={{
+                        tab: {
+                          fontWeight: 500,
+                          transition: "color 100ms ease",
+                          color: "var(--mantine-color-gray-7)",
+                        },
+                      }}
+                      value="2"
+                      ref={setControlRef("2")}
+                    >
                       <Text>По площади</Text>
                     </Tabs.Tab>
 
-
-                    <FloatingIndicator target={value ? controlsRefs[value] : null} parent={rootRef} styles={{
-                      root: {
-                        backgroundColor: 'transparent',
-                        borderRadius: ".5rem",
-                        border: "1px solid lightgray",
-                        boxShadow: "var(--mantine-shadow-sm)"
-
-                      }
-                    }} />
+                    <FloatingIndicator
+                      target={value ? controlsRefs[value] : null}
+                      parent={rootRef}
+                      styles={{
+                        root: {
+                          backgroundColor: "transparent",
+                          borderRadius: "0",
+                          border: "1px solid lightgray",
+                          boxShadow: "var(--mantine-shadow-sm)",
+                        },
+                      }}
+                    />
                   </Tabs.List>
 
-                  <Tabs.Panel value="1" >
-                <FieldPreview />
+                  <Tabs.Panel value="1">
+                    <FieldPreview />
                   </Tabs.Panel>
-                  <Tabs.Panel value='2'>
+                  <Tabs.Panel value="2">
                     <AreaSelection />
                   </Tabs.Panel>
                 </Tabs>
               </Grid.Col>
-              <Grid.Col span={{base: 12, md: 6}}>
+              <Grid.Col span={{ base: 12, md: 6 }}>
                 <CalculatedFields />
               </Grid.Col>
             </Grid>
           </Stack>
         </Paper>{" "}
-        <Flex direction={{base: 'column', md: "row"}} w={"100%"} gap={"xl"}>
+        <Flex direction={{ base: "column", md: "row" }} w={"100%"} gap={"xl"}>
           {cardsInfo.map((card) => (
             <Paper
               withBorder
